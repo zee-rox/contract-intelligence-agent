@@ -1,0 +1,66 @@
+{
+  "dataset_version": "phase5-synthetic-v1",
+  "description": "Small synthetic contract set for reproducible backend evaluation. No confidential or copied contract text is included.",
+  "documents": [
+    {
+      "document_id": "synthetic-services-agreement",
+      "filename": "synthetic-services-agreement.docx",
+      "paragraphs": [
+        {"heading": "Payment", "text": "Invoices are due within thirty days after receipt."},
+        {"heading": "Termination", "text": "Either party may terminate this Agreement with thirty days written notice."},
+        {"heading": "Liability", "text": "Supplier liability is unlimited for confidentiality breaches."},
+        {"heading": "Confidentiality", "text": "Each party shall keep confidential information confidential during the term."}
+      ],
+      "expected_clauses": [
+        {"clause_type": "payment_terms", "snippet": "Invoices are due within thirty days after receipt.", "risk_level": "low"},
+        {"clause_type": "termination", "snippet": "thirty days written notice", "risk_level": "low"},
+        {"clause_type": "liability", "snippet": "liability is unlimited", "risk_level": "high"},
+        {"clause_type": "confidentiality", "snippet": "during the term", "risk_level": "low"}
+      ],
+      "questions": [
+        {
+          "question": "When are invoices due?",
+          "expected_refused": false,
+          "expected_answer_terms": ["thirty", "days"],
+          "expected_citation_terms": ["Invoices", "thirty days"]
+        },
+        {
+          "question": "What insurance coverage is required?",
+          "expected_refused": true,
+          "expected_answer_terms": [],
+          "expected_citation_terms": []
+        }
+      ],
+      "ocr_expected_pages": 0
+    },
+    {
+      "document_id": "synthetic-law-agreement",
+      "filename": "synthetic-law-agreement.docx",
+      "paragraphs": [
+        {"heading": "Governing Law", "text": "This Agreement is governed by the laws of New York."},
+        {"heading": "Force Majeure", "text": "Neither party is liable for delays caused by events beyond reasonable control."},
+        {"heading": "Indemnification", "text": "Customer shall indemnify Supplier against third party claims arising from misuse."}
+      ],
+      "expected_clauses": [
+        {"clause_type": "governing_law", "snippet": "laws of New York", "risk_level": "low"},
+        {"clause_type": "force_majeure", "snippet": "events beyond reasonable control", "risk_level": "low"},
+        {"clause_type": "indemnification", "snippet": "third party claims", "risk_level": "low"}
+      ],
+      "questions": [
+        {
+          "question": "What law governs the agreement?",
+          "expected_refused": false,
+          "expected_answer_terms": ["New York"],
+          "expected_citation_terms": ["governed", "New York"]
+        },
+        {
+          "question": "How can either party terminate?",
+          "expected_refused": true,
+          "expected_answer_terms": [],
+          "expected_citation_terms": []
+        }
+      ],
+      "ocr_expected_pages": 0
+    }
+  ]
+}

@@ -89,7 +89,7 @@ User question
 
 ## Implemented Backend Capabilities
 
-Phases 1 and 2 are implemented for the backend:
+Phases 1 through 5 are implemented for the backend:
 
 - FastAPI application skeleton with `/health`.
 - Typed environment configuration through Pydantic settings.
@@ -98,7 +98,7 @@ Phases 1 and 2 are implemented for the backend:
 - DOCX upload parsing with paragraph locators and table row text.
 - Text normalization that preserves raw extracted text separately.
 - Deterministic clause-aware candidate chunking.
-- Provider-independent LLM interface with a Groq provider and deterministic local provider.
+- Provider-independent LLM interface with Groq, llama.cpp-compatible, and deterministic local providers.
 - Structured clause extraction with one validation retry and heuristic fallback.
 - Deterministic embedding service.
 - One FAISS index per document with persisted metadata.
@@ -116,9 +116,12 @@ Phases 1 and 2 are implemented for the backend:
 - Bounded Groq timeout retries and concurrency control.
 - Versioned index metadata with corrupt artifact detection.
 - Secret-safe configuration summaries for diagnostics.
+- Versioned executable evaluation dataset.
+- Reproducible evaluation runner with machine-readable JSON output.
+- Generated `EVAL.md` with actual metrics and error analysis.
 - Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
 
-Evaluation harnesses, frontend, Docker, final deployment polish, and llama.cpp support are intentionally not implemented yet.
+Frontend, Docker, and final deployment polish are intentionally not implemented yet.
 
 ## Repository Structure
 
@@ -136,6 +139,7 @@ contract-intelligence-agent/
 │   │   ├── storage/
 │   │   ├── services/
 │   │   └── observability/
+│   ├── eval/
 │   ├── tests/
 │   ├── pyproject.toml
 │   └── requirements.txt
@@ -168,6 +172,8 @@ Useful endpoints:
 
 The default `.env.example` uses `LLM_PROVIDER=fake` so local tests and demos do not require external credentials. To use Groq, set `LLM_PROVIDER=groq` and provide `GROQ_API_KEY` or `LLM_API_KEY`.
 
+To use a llama.cpp-compatible server, set `LLM_PROVIDER=llamacpp` and `LLAMACPP_BASE_URL` or `LLM_BASE_URL` to an OpenAI-compatible `/v1` base URL.
+
 OCR support requires system OCR tools in addition to Python packages:
 
 - Tesseract OCR.
@@ -185,11 +191,27 @@ python -m mypy app
 pytest
 ```
 
+Run the evaluation harness from `backend/`:
+
+```bash
+python -m eval.runner
+```
+
+This writes machine-readable results to `backend/eval/results/latest.json` and regenerates `EVAL.md`.
+
 Current local validation:
 
 - `python -m ruff check .`: passed.
-- `python -m mypy app`: passed for 60 source files.
-- `pytest`: 27 passed.
+- `python -m mypy app`: passed for 61 source files.
+- `pytest`: 30 passed.
+- `python -m eval.runner`: completed on dataset `phase5-synthetic-v1`.
+
+Latest evaluation results:
+
+- Clause F1: `0.8571`
+- Risk accuracy: `1.0`
+- Citation validity: `1.0`
+- Refusal accuracy: `0.75`
 
 ## Data And Citation Rules
 
@@ -209,9 +231,9 @@ Provider-specific credentials are required only for the active provider. Secrets
 
 ## Development Status
 
-Current phase: Phase 4 complete.
+Current phase: Phase 5 complete.
 
-Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is the evaluation harness.
+Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is the frontend.
 
 ## Git Workflow
 

@@ -142,8 +142,59 @@ Known limitations:
 
 ## Phase 5
 
-Status: not started.
+Status: completed.
 
 Scope:
 
 - Evaluation harness.
+
+Completed work:
+
+- Added versioned synthetic evaluation dataset `phase5-synthetic-v1`.
+- Added human-readable annotation schemas for expected clauses, risks, questions, refusals, and OCR expectations.
+- Added executable evaluation runner.
+- Added clause precision/recall/F1 and boundary support metrics.
+- Added risk accuracy metric.
+- Added citation validity metric against cited source chunks.
+- Added refusal accuracy metric.
+- Added OCR metric reporting with explicit no-OCR-fixture status.
+- Added performance timing.
+- Added machine-readable output at `backend/eval/results/latest.json`.
+- Added generated `EVAL.md` with actual results and issue details.
+- Added Groq/fake/llama.cpp provider abstraction support and llama.cpp provider path test.
+- Added provider comparison section that records skipped llama.cpp runs instead of inventing results.
+
+Latest generated results:
+
+- Clause precision: `0.8571`
+- Clause recall: `0.8571`
+- Clause F1: `0.8571`
+- Boundary support rate: `0.8571`
+- Risk accuracy: `1.0`
+- Citation validity: `1.0`
+- Refusal accuracy: `0.75`
+- OCR evaluated pages: `0`
+
+Validation commands:
+
+```bash
+cd backend
+python -m ruff check .
+python -m mypy app
+pytest
+python -m eval.runner
+```
+
+Known limitations:
+
+- The current dataset is intentionally small and synthetic.
+- OCR degradation is not measured yet because the Phase 5 dataset does not include a scanned fixture.
+- llama.cpp comparison is skipped unless `EVAL_RUN_LLAMA_CPP=true` and `LLAMACPP_BASE_URL` are configured.
+
+## Phase 6
+
+Status: not started.
+
+Scope:
+
+- Frontend.

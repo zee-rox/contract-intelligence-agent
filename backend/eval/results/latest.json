@@ -1,0 +1,775 @@
+{
+  "configuration": {
+    "allowed_origins": [
+      "http://localhost:3000"
+    ],
+    "app_env": "development",
+    "app_host": "127.0.0.1",
+    "app_port": 8000,
+    "embedding_dimension": 64,
+    "embedding_model": "deterministic-hash-embedding-v1",
+    "llm_base_url": "",
+    "llm_max_concurrency": 4,
+    "llm_max_retries": 1,
+    "llm_model": "llama-3.1-8b-instant",
+    "llm_provider": "fake",
+    "llm_timeout_seconds": 30.0,
+    "log_level": "INFO",
+    "max_upload_size_mb": 25,
+    "ocr_enabled": true,
+    "retrieval_score_threshold": 0.0,
+    "retrieval_top_k": 5,
+    "storage_root": "/tmp/contract-eval-r795f6l4/storage"
+  },
+  "dataset_path": "backend/eval/datasets/phase5_dataset.json",
+  "dataset_version": "phase5-synthetic-v1",
+  "documents": [
+    {
+      "chunks": [
+        {
+          "char_count": 59,
+          "chunk_id": "chunk_0000_45cd32fce9771283",
+          "chunk_index": 0,
+          "detected_heading": "Payment",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "normalized_text": "Payment\n\nInvoices are due within thirty days after receipt.",
+          "source_locators": [
+            {
+              "char_offset_end": 7,
+              "char_offset_start": 0,
+              "paragraph_end": 1,
+              "paragraph_start": 1,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 50,
+              "char_offset_start": 0,
+              "paragraph_end": 2,
+              "paragraph_start": 2,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Payment\n\nInvoices are due within thirty days after receipt.",
+          "token_count_estimate": 9
+        },
+        {
+          "char_count": 87,
+          "chunk_id": "chunk_0001_d7dc0e01325b99f0",
+          "chunk_index": 1,
+          "detected_heading": "Termination",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "normalized_text": "Termination\n\nEither party may terminate this Agreement with thirty days written notice.",
+          "source_locators": [
+            {
+              "char_offset_end": 11,
+              "char_offset_start": 0,
+              "paragraph_end": 3,
+              "paragraph_start": 3,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 74,
+              "char_offset_start": 0,
+              "paragraph_end": 4,
+              "paragraph_start": 4,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Termination\n\nEither party may terminate this Agreement with thirty days written notice.",
+          "token_count_estimate": 12
+        },
+        {
+          "char_count": 72,
+          "chunk_id": "chunk_0002_324d61c28def9467",
+          "chunk_index": 2,
+          "detected_heading": "Liability",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "normalized_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
+          "source_locators": [
+            {
+              "char_offset_end": 9,
+              "char_offset_start": 0,
+              "paragraph_end": 5,
+              "paragraph_start": 5,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 61,
+              "char_offset_start": 0,
+              "paragraph_end": 6,
+              "paragraph_start": 6,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
+          "token_count_estimate": 8
+        },
+        {
+          "char_count": 93,
+          "chunk_id": "chunk_0003_a25b4accc77e0883",
+          "chunk_index": 3,
+          "detected_heading": "Confidentiality",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "normalized_text": "Confidentiality\n\nEach party shall keep confidential information confidential during the term.",
+          "source_locators": [
+            {
+              "char_offset_end": 15,
+              "char_offset_start": 0,
+              "paragraph_end": 7,
+              "paragraph_start": 7,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 76,
+              "char_offset_start": 0,
+              "paragraph_end": 8,
+              "paragraph_start": 8,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Confidentiality\n\nEach party shall keep confidential information confidential during the term.",
+          "token_count_estimate": 11
+        }
+      ],
+      "dataset_document_id": "synthetic-services-agreement",
+      "expected_clauses": [
+        {
+          "clause_type": "payment_terms",
+          "risk_level": "low",
+          "snippet": "Invoices are due within thirty days after receipt."
+        },
+        {
+          "clause_type": "termination",
+          "risk_level": "low",
+          "snippet": "thirty days written notice"
+        },
+        {
+          "clause_type": "liability",
+          "risk_level": "high",
+          "snippet": "liability is unlimited"
+        },
+        {
+          "clause_type": "confidentiality",
+          "risk_level": "low",
+          "snippet": "during the term"
+        }
+      ],
+      "ocr_actual_pages": 0,
+      "ocr_expected_pages": 0,
+      "predicted_clauses": [
+        {
+          "clause_heading": "Termination",
+          "clause_id": "clause_0000",
+          "clause_text": "Termination\n\nEither party may terminate this Agreement with thirty days written notice.",
+          "clause_type": "termination",
+          "confidence": "medium",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0001_d7dc0e01325b99f0"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 11,
+              "char_offset_start": 0,
+              "paragraph_end": 3,
+              "paragraph_start": 3,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 74,
+              "char_offset_start": 0,
+              "paragraph_end": 4,
+              "paragraph_start": 4,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        },
+        {
+          "clause_heading": "Confidentiality",
+          "clause_id": "clause_0001",
+          "clause_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
+          "clause_type": "confidentiality",
+          "confidence": "medium",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0002_324d61c28def9467"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 9,
+              "char_offset_start": 0,
+              "paragraph_end": 5,
+              "paragraph_start": 5,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 61,
+              "char_offset_start": 0,
+              "paragraph_end": 6,
+              "paragraph_start": 6,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        },
+        {
+          "clause_heading": "Payment",
+          "clause_id": "clause_0002",
+          "clause_text": "Payment\n\nInvoices are due within thirty days after receipt.",
+          "clause_type": "payment_terms",
+          "confidence": "medium",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0000_45cd32fce9771283"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 7,
+              "char_offset_start": 0,
+              "paragraph_end": 1,
+              "paragraph_start": 1,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 50,
+              "char_offset_start": 0,
+              "paragraph_end": 2,
+              "paragraph_start": 2,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        },
+        {
+          "clause_heading": "Liability",
+          "clause_id": "clause_0003",
+          "clause_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
+          "clause_type": "liability",
+          "confidence": "medium",
+          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0002_324d61c28def9467"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 9,
+              "char_offset_start": 0,
+              "paragraph_end": 5,
+              "paragraph_start": 5,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 61,
+              "char_offset_start": 0,
+              "paragraph_end": 6,
+              "paragraph_start": 6,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        }
+      ],
+      "predicted_risks": [
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0000",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "No obvious baseline concern was detected in this clause."
+          ],
+          "risk_level": "low",
+          "risk_reason": "The termination clause is rated low based on the automated baseline. This is informational only and does not replace legal review."
+        },
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0001",
+          "confidence": "medium",
+          "missing_expected_elements": [
+            "No clear survival period was detected."
+          ],
+          "observed_factors": [],
+          "risk_level": "medium",
+          "risk_reason": "The confidentiality clause is rated medium based on the automated baseline. This is informational only and does not replace legal review."
+        },
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0002",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "No obvious baseline concern was detected in this clause."
+          ],
+          "risk_level": "low",
+          "risk_reason": "The payment terms clause is rated low based on the automated baseline. This is informational only and does not replace legal review."
+        },
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0003",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "The clause references unlimited liability."
+          ],
+          "risk_level": "high",
+          "risk_reason": "The liability clause is rated high based on the automated baseline. This is informational only and does not replace legal review."
+        }
+      ],
+      "qa_results": [
+        {
+          "expected_answer_terms": [
+            "thirty",
+            "days"
+          ],
+          "expected_citation_terms": [
+            "Invoices",
+            "thirty days"
+          ],
+          "expected_refused": false,
+          "question": "When are invoices due?",
+          "response": {
+            "answer": "Based on the cited contract text, the payment provision states: Invoices are due within thirty days after receipt. [cit_0000]",
+            "citations": [
+              {
+                "chunk_id": "chunk_0000_45cd32fce9771283",
+                "citation_id": "cit_0000",
+                "quoted_snippet": "Invoices are due within thirty days after receipt.",
+                "source_locator": {
+                  "char_offset_end": 7,
+                  "char_offset_start": 0,
+                  "paragraph_end": 1,
+                  "paragraph_start": 1,
+                  "section_number": 1,
+                  "source_type": "docx"
+                }
+              }
+            ],
+            "confidence": "medium",
+            "refusal_reason": null,
+            "refused": false
+          }
+        },
+        {
+          "expected_answer_terms": [],
+          "expected_citation_terms": [],
+          "expected_refused": true,
+          "question": "What insurance coverage is required?",
+          "response": {
+            "answer": "The document does not provide enough information to answer that question.",
+            "citations": [],
+            "confidence": "low",
+            "refusal_reason": "insufficient_evidence",
+            "refused": true
+          }
+        }
+      ],
+      "runtime_seconds": 0.0743,
+      "source_sha256": "583bd22576c9207741e2a18049e301d9ed5876633133d947789d38b974088d24"
+    },
+    {
+      "chunks": [
+        {
+          "char_count": 66,
+          "chunk_id": "chunk_0000_c60911d0064778bd",
+          "chunk_index": 0,
+          "detected_heading": "Governing Law",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "normalized_text": "Governing Law\n\nThis Agreement is governed by the laws of New York.",
+          "source_locators": [
+            {
+              "char_offset_end": 13,
+              "char_offset_start": 0,
+              "paragraph_end": 1,
+              "paragraph_start": 1,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 51,
+              "char_offset_start": 0,
+              "paragraph_end": 2,
+              "paragraph_start": 2,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Governing Law\n\nThis Agreement is governed by the laws of New York.",
+          "token_count_estimate": 12
+        },
+        {
+          "char_count": 93,
+          "chunk_id": "chunk_0001_0afede65c2585e32",
+          "chunk_index": 1,
+          "detected_heading": "Force Majeure",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "normalized_text": "Force Majeure\n\nNeither party is liable for delays caused by events beyond reasonable control.",
+          "source_locators": [
+            {
+              "char_offset_end": 13,
+              "char_offset_start": 0,
+              "paragraph_end": 3,
+              "paragraph_start": 3,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 78,
+              "char_offset_start": 0,
+              "paragraph_end": 4,
+              "paragraph_start": 4,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Force Majeure\n\nNeither party is liable for delays caused by events beyond reasonable control.",
+          "token_count_estimate": 14
+        },
+        {
+          "char_count": 98,
+          "chunk_id": "chunk_0002_40921cae3f603639",
+          "chunk_index": 2,
+          "detected_heading": "Indemnification",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "normalized_text": "Indemnification\n\nCustomer shall indemnify Supplier against third party claims arising from misuse.",
+          "source_locators": [
+            {
+              "char_offset_end": 15,
+              "char_offset_start": 0,
+              "paragraph_end": 5,
+              "paragraph_start": 5,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 81,
+              "char_offset_start": 0,
+              "paragraph_end": 6,
+              "paragraph_start": 6,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ],
+          "splitter_strategy": "structural",
+          "text": "Indemnification\n\nCustomer shall indemnify Supplier against third party claims arising from misuse.",
+          "token_count_estimate": 12
+        }
+      ],
+      "dataset_document_id": "synthetic-law-agreement",
+      "expected_clauses": [
+        {
+          "clause_type": "governing_law",
+          "risk_level": "low",
+          "snippet": "laws of New York"
+        },
+        {
+          "clause_type": "force_majeure",
+          "risk_level": "low",
+          "snippet": "events beyond reasonable control"
+        },
+        {
+          "clause_type": "indemnification",
+          "risk_level": "low",
+          "snippet": "third party claims"
+        }
+      ],
+      "ocr_actual_pages": 0,
+      "ocr_expected_pages": 0,
+      "predicted_clauses": [
+        {
+          "clause_heading": "Governing Law",
+          "clause_id": "clause_0000",
+          "clause_text": "Governing Law\n\nThis Agreement is governed by the laws of New York.",
+          "clause_type": "governing_law",
+          "confidence": "medium",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0000_c60911d0064778bd"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 13,
+              "char_offset_start": 0,
+              "paragraph_end": 1,
+              "paragraph_start": 1,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 51,
+              "char_offset_start": 0,
+              "paragraph_end": 2,
+              "paragraph_start": 2,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        },
+        {
+          "clause_heading": "Indemnification",
+          "clause_id": "clause_0001",
+          "clause_text": "Indemnification\n\nCustomer shall indemnify Supplier against third party claims arising from misuse.",
+          "clause_type": "indemnification",
+          "confidence": "medium",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0002_40921cae3f603639"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 15,
+              "char_offset_start": 0,
+              "paragraph_end": 5,
+              "paragraph_start": 5,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 81,
+              "char_offset_start": 0,
+              "paragraph_end": 6,
+              "paragraph_start": 6,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        },
+        {
+          "clause_heading": "Force Majeure",
+          "clause_id": "clause_0002",
+          "clause_text": "Force Majeure\n\nNeither party is liable for delays caused by events beyond reasonable control.",
+          "clause_type": "force_majeure",
+          "confidence": "medium",
+          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "extraction_notes": "detected by deterministic fake provider",
+          "source_chunk_ids": [
+            "chunk_0001_0afede65c2585e32"
+          ],
+          "source_locators": [
+            {
+              "char_offset_end": 13,
+              "char_offset_start": 0,
+              "paragraph_end": 3,
+              "paragraph_start": 3,
+              "section_number": 1,
+              "source_type": "docx"
+            },
+            {
+              "char_offset_end": 78,
+              "char_offset_start": 0,
+              "paragraph_end": 4,
+              "paragraph_start": 4,
+              "section_number": 1,
+              "source_type": "docx"
+            }
+          ]
+        }
+      ],
+      "predicted_risks": [
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0000",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "No obvious baseline concern was detected in this clause."
+          ],
+          "risk_level": "low",
+          "risk_reason": "The governing law clause is rated low based on the automated baseline. This is informational only and does not replace legal review."
+        },
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0001",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "No obvious baseline concern was detected in this clause."
+          ],
+          "risk_level": "low",
+          "risk_reason": "The indemnification clause is rated low based on the automated baseline. This is informational only and does not replace legal review."
+        },
+        {
+          "baseline_version": "risk-baseline-v1",
+          "clause_id": "clause_0002",
+          "confidence": "medium",
+          "missing_expected_elements": [],
+          "observed_factors": [
+            "No obvious baseline concern was detected in this clause."
+          ],
+          "risk_level": "low",
+          "risk_reason": "The force majeure clause is rated low based on the automated baseline. This is informational only and does not replace legal review."
+        }
+      ],
+      "qa_results": [
+        {
+          "expected_answer_terms": [
+            "New York"
+          ],
+          "expected_citation_terms": [
+            "governed",
+            "New York"
+          ],
+          "expected_refused": false,
+          "question": "What law governs the agreement?",
+          "response": {
+            "answer": "Based on the cited contract text, the contract states: Governing Law. [cit_0000]",
+            "citations": [
+              {
+                "chunk_id": "chunk_0000_c60911d0064778bd",
+                "citation_id": "cit_0000",
+                "quoted_snippet": "Governing Law",
+                "source_locator": {
+                  "char_offset_end": 13,
+                  "char_offset_start": 0,
+                  "paragraph_end": 1,
+                  "paragraph_start": 1,
+                  "section_number": 1,
+                  "source_type": "docx"
+                }
+              }
+            ],
+            "confidence": "medium",
+            "refusal_reason": null,
+            "refused": false
+          }
+        },
+        {
+          "expected_answer_terms": [],
+          "expected_citation_terms": [],
+          "expected_refused": true,
+          "question": "How can either party terminate?",
+          "response": {
+            "answer": "Based on the cited contract text, the termination provision states: Customer shall indemnify Supplier against third party claims arising from misuse. [cit_0000], [cit_0001]",
+            "citations": [
+              {
+                "chunk_id": "chunk_0002_40921cae3f603639",
+                "citation_id": "cit_0000",
+                "quoted_snippet": "Customer shall indemnify Supplier against third party claims arising from misuse.",
+                "source_locator": {
+                  "char_offset_end": 15,
+                  "char_offset_start": 0,
+                  "paragraph_end": 5,
+                  "paragraph_start": 5,
+                  "section_number": 1,
+                  "source_type": "docx"
+                }
+              },
+              {
+                "chunk_id": "chunk_0001_0afede65c2585e32",
+                "citation_id": "cit_0001",
+                "quoted_snippet": "Neither party is liable for delays caused by events beyond reasonable control.",
+                "source_locator": {
+                  "char_offset_end": 13,
+                  "char_offset_start": 0,
+                  "paragraph_end": 3,
+                  "paragraph_start": 3,
+                  "section_number": 1,
+                  "source_type": "docx"
+                }
+              }
+            ],
+            "confidence": "medium",
+            "refusal_reason": null,
+            "refused": false
+          }
+        }
+      ],
+      "runtime_seconds": 0.0696,
+      "source_sha256": "865a5d8f283a067f9010107498e1a773ea90ffaa1bb8641728d0e78ad45165c1"
+    }
+  ],
+  "error_analysis": {
+    "boundary_failures": [
+      {
+        "clause_type": "confidentiality",
+        "document_id": "synthetic-services-agreement",
+        "expected_snippet": "during the term"
+      }
+    ],
+    "citation_failures": [],
+    "incorrect_refusals": [
+      {
+        "document_id": "synthetic-law-agreement",
+        "question": "How can either party terminate?"
+      }
+    ],
+    "ocr_degradation": "not evaluated; dataset contains no OCR fixture",
+    "risk_disagreements": [],
+    "unsupported_answer_issues": [
+      {
+        "document_id": "synthetic-law-agreement",
+        "question": "How can either party terminate?"
+      }
+    ],
+    "weak_clause_categories": [
+      "confidentiality"
+    ]
+  },
+  "metrics": {
+    "citation": {
+      "evaluated": 4,
+      "validity_rate": 1.0
+    },
+    "clause": {
+      "boundary_support_rate": 0.8571,
+      "f1": 0.8571,
+      "precision": 0.8571,
+      "recall": 0.8571
+    },
+    "ocr": {
+      "actual_ocr_pages": 0,
+      "evaluated_pages": 0,
+      "status": "not_evaluated_no_ocr_fixture"
+    },
+    "performance": {
+      "documents": 2,
+      "total_seconds": 0.1461
+    },
+    "refusal": {
+      "accuracy": 0.75,
+      "evaluated": 4
+    },
+    "risk": {
+      "accuracy": 1.0,
+      "evaluated": 6
+    }
+  },
+  "provider_comparison": [
+    {
+      "notes": "Primary deterministic evaluation provider.",
+      "provider": "fake",
+      "status": "completed"
+    },
+    {
+      "notes": "Set EVAL_RUN_LLAMA_CPP=true and LLAMACPP_BASE_URL to run.",
+      "provider": "llamacpp",
+      "status": "skipped"
+    }
+  ],
+  "result_path": "backend/eval/results/latest.json",
+  "run_id": "20260710T163941Z"
+}

@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = Field(default=25, ge=1, le=200)
     allowed_origins: list[str] = ["http://localhost:3000"]
 
-    llm_provider: Literal["groq", "fake"] = "fake"
+    llm_provider: Literal["groq", "fake", "llamacpp"] = "fake"
     llm_model: str = "llama-3.1-8b-instant"
     llm_api_key: str | None = None
     llm_base_url: str | None = None
@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     llm_max_retries: int = Field(default=1, ge=0, le=5)
     llm_max_concurrency: int = Field(default=4, ge=1, le=32)
     groq_api_key: str | None = None
+    llamacpp_base_url: str | None = None
 
     ocr_enabled: bool = True
     ocr_language: str = "eng"
@@ -67,6 +68,7 @@ class Settings(BaseSettings):
             "allowed_origins": self.allowed_origins,
             "llm_provider": self.llm_provider,
             "llm_model": self.llm_model,
+            "llm_base_url": self.llm_base_url or self.llamacpp_base_url or "",
             "llm_timeout_seconds": self.llm_timeout_seconds,
             "llm_max_retries": self.llm_max_retries,
             "llm_max_concurrency": self.llm_max_concurrency,
