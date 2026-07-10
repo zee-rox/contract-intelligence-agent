@@ -107,9 +107,43 @@ Known limitations:
 
 ## Phase 4
 
-Status: not started.
+Status: completed.
 
 Scope:
 
 - Structured output hardening.
 - Operational reliability.
+
+Completed work:
+
+- Added typed `AppError` handling and structured API error payloads.
+- Added request ID middleware and request ID logging context.
+- Hardened atomic writes with fsync and temporary-file cleanup.
+- Added per-document in-process locks for ingestion, extraction, and analysis.
+- Added index metadata artifact versioning and corrupt metadata detection.
+- Added FAISS/index metadata consistency checks.
+- Added bounded Groq timeout retries and concurrency limiting.
+- Added secret-safe settings summaries for diagnostics.
+- Ensured failed indexing leaves the document manifest in `failed`, not `ready`.
+- Added tests for interrupted writes, provider timeouts, duplicate analysis requests, corrupt metadata, secret redaction, and partial indexing failure.
+
+Validation commands:
+
+```bash
+cd backend
+python -m ruff check .
+python -m mypy app
+pytest
+```
+
+Known limitations:
+
+- Per-document locks are in-process and suitable for the current single-service local backend. A distributed deployment would need an external lock manager before running multiple backend workers against the same storage root.
+
+## Phase 5
+
+Status: not started.
+
+Scope:
+
+- Evaluation harness.

@@ -1,6 +1,9 @@
 import json
+from json import JSONDecodeError
 from pathlib import Path
 from uuid import UUID
+
+from pydantic import ValidationError
 
 from app.schemas.chunks import CandidateChunk
 from app.schemas.analysis import AnalysisManifest
@@ -9,6 +12,7 @@ from app.schemas.documents import DocumentRecord, ExtractedPage, ExtractedParagr
 from app.schemas.retrieval import IndexMetadata
 from app.schemas.risks import RiskAssessment
 from app.storage.atomic import atomic_write_json
+from app.storage.errors import ArtifactValidationError
 from app.storage.paths import StoragePaths
 
 
@@ -28,8 +32,11 @@ class StorageRepository:
         atomic_write_json(self.paths.manifest(record.document_id), record)
 
     def load_manifest(self, document_id: UUID) -> DocumentRecord:
-        data = json.loads(self.paths.manifest(document_id).read_text(encoding="utf-8"))
-        return DocumentRecord.model_validate(data)
+        try:
+            data = json.loads(self.paths.manifest(document_id).read_text(encoding="utf-8"))
+            return DocumentRecord.model_validate(data)
+        except (JSONDecodeError, ValidationError) as exc:
+            raise ArtifactValidationError("manifest artifact is corrupt or incompatible") from exc
 
     def save_pages(self, document_id: UUID, pages: list[ExtractedPage]) -> None:
         atomic_write_json(self.paths.pages(document_id), pages)
@@ -82,5 +89,13 @@ class StorageRepository:
         atomic_write_json(self.paths.index_metadata(metadata.document_id), metadata)
 
     def load_index_metadata(self, document_id: UUID) -> IndexMetadata:
-        data = json.loads(self.paths.index_metadata(document_id).read_text(encoding="utf-8"))
-        return IndexMetadata.model_validate(data)
+        try:
+            data = json.loads(self.paths.index_metadata(document_id).read_text(encoding="utf-8"))
+            metadata = IndexMetadata.model_validate(data)
+        except (JSONDecodeError, ValidationError) as exc:
+            raise ArtifactValidationError("index metadata artifact is corrupt or incompatible") from exc
+        if metadata.document_id != document_id:
+            raise ArtifactValidationError("index metadata document_id does not match requested document")
+        if metadata.artifact_version != "index-metadata-v1":
+            raise ArtifactValidationError("index metadata artifact version is unsupported")
+        return metadata

@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import ValidationError
 
+from app.api.errors import AppError, app_error_handler, validation_error_handler
 from app.api.router import api_router
 from app.config import get_settings
 from app.observability.logging import configure_logging
+from app.observability.middleware import request_id_middleware
 
 
 def create_app() -> FastAPI:
@@ -22,6 +25,9 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.middleware("http")(request_id_middleware)
+    app.add_exception_handler(AppError, app_error_handler)
+    app.add_exception_handler(ValidationError, validation_error_handler)
     app.include_router(api_router)
     return app
 

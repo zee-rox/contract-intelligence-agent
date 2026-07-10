@@ -56,6 +56,27 @@ class Settings(BaseSettings):
     def active_llm_api_key(self) -> str | None:
         return self.llm_api_key or self.groq_api_key
 
+    def safe_summary(self) -> dict[str, str | int | float | bool | list[str]]:
+        return {
+            "app_env": self.app_env,
+            "app_host": self.app_host,
+            "app_port": self.app_port,
+            "log_level": self.log_level,
+            "storage_root": str(self.storage_root),
+            "max_upload_size_mb": self.max_upload_size_mb,
+            "allowed_origins": self.allowed_origins,
+            "llm_provider": self.llm_provider,
+            "llm_model": self.llm_model,
+            "llm_timeout_seconds": self.llm_timeout_seconds,
+            "llm_max_retries": self.llm_max_retries,
+            "llm_max_concurrency": self.llm_max_concurrency,
+            "ocr_enabled": self.ocr_enabled,
+            "embedding_model": self.embedding_model,
+            "embedding_dimension": self.embedding_dimension,
+            "retrieval_top_k": self.retrieval_top_k,
+            "retrieval_score_threshold": self.retrieval_score_threshold,
+        }
+
 
 @lru_cache
 def get_settings() -> Settings:

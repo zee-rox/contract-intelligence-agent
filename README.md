@@ -110,9 +110,15 @@ Phases 1 and 2 are implemented for the backend:
 - Refusal behavior for unsupported questions.
 - Prompt-injection marker filtering before citation use.
 - SSE streaming for structured QA responses.
+- Typed API error responses with request IDs.
+- Atomic artifact writes with cleanup on interrupted writes.
+- Per-document locks for ingestion, extraction, and analysis.
+- Bounded Groq timeout retries and concurrency control.
+- Versioned index metadata with corrupt artifact detection.
+- Secret-safe configuration summaries for diagnostics.
 - Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
 
-Evaluation harnesses, frontend, Docker, structured output hardening, operational reliability work, and llama.cpp support are intentionally not implemented yet.
+Evaluation harnesses, frontend, Docker, final deployment polish, and llama.cpp support are intentionally not implemented yet.
 
 ## Repository Structure
 
@@ -182,8 +188,8 @@ pytest
 Current local validation:
 
 - `python -m ruff check .`: passed.
-- `python -m mypy app`: passed for 55 source files.
-- `pytest`: 21 passed.
+- `python -m mypy app`: passed for 60 source files.
+- `pytest`: 27 passed.
 
 ## Data And Citation Rules
 
@@ -203,9 +209,9 @@ Provider-specific credentials are required only for the active provider. Secrets
 
 ## Development Status
 
-Current phase: Phase 3 complete.
+Current phase: Phase 4 complete.
 
-Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is structured output hardening and operational reliability.
+Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is the evaluation harness.
 
 ## Git Workflow
 

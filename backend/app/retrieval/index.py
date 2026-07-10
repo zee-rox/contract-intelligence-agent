@@ -8,6 +8,7 @@ import numpy as np
 from app.retrieval.embeddings import HashEmbeddingService
 from app.schemas.chunks import CandidateChunk
 from app.schemas.retrieval import IndexMetadata, RetrievalResult
+from app.storage.errors import ArtifactValidationError
 from app.storage.repository import StorageRepository
 
 
@@ -38,7 +39,12 @@ class DocumentFaissIndex:
 
     def search(self, document_id: UUID, query: str, top_k: int) -> list[RetrievalResult]:
         metadata = self.repository.load_index_metadata(document_id)
-        index = faiss.read_index(str(self.repository.paths.faiss_index(document_id)))
+        index_path = self.repository.paths.faiss_index(document_id)
+        if not index_path.exists():
+            raise ArtifactValidationError("FAISS index artifact is missing")
+        index = faiss.read_index(str(index_path))
+        if index.d != metadata.embedding_dimension:
+            raise ArtifactValidationError("FAISS index dimension does not match metadata")
         query_vector = self.embedding_service.embed_query(query)
         scores, positions = index.search(query_vector, min(top_k, len(metadata.chunk_ids)))
         results: list[RetrievalResult] = []
