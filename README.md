@@ -87,7 +87,29 @@ User question
 - Retrieval thresholds start as configurable constants and are tuned through the evaluation harness.
 - Evaluation claims must be produced by the repository's evaluation harness. Do not invent accuracy, citation, or refusal metrics.
 
-## Planned Repository Structure
+## Implemented Backend Capabilities
+
+Phases 1 and 2 are implemented for the backend:
+
+- FastAPI application skeleton with `/health`.
+- Typed environment configuration through Pydantic settings.
+- Atomic per-document storage rooted at `STORAGE_ROOT`.
+- PDF upload parsing with PyMuPDF and selective per-page OCR fallback hooks.
+- DOCX upload parsing with paragraph locators and table row text.
+- Text normalization that preserves raw extracted text separately.
+- Deterministic clause-aware candidate chunking.
+- Provider-independent LLM interface with a Groq provider and deterministic local provider.
+- Structured clause extraction with one validation retry and heuristic fallback.
+- Deterministic embedding service.
+- One FAISS index per document with persisted metadata.
+- LangGraph analysis supervisor that runs clause extraction before risk assessment.
+- Versioned risk baseline with persisted risk explanations.
+- Clause analysis API that reloads persisted analysis results on repeat requests.
+- Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
+
+Question answering, grounded citation validation, SSE streaming, evaluation harnesses, frontend, Docker, and llama.cpp support are intentionally not implemented yet.
+
+## Repository Structure
 
 ```text
 contract-intelligence-agent/
@@ -99,30 +121,62 @@ contract-intelligence-agent/
 │   │   ├── retrieval/
 │   │   ├── agents/
 │   │   ├── llm/
-│   │   ├── prompts/
 │   │   ├── schemas/
 │   │   ├── storage/
 │   │   ├── services/
 │   │   └── observability/
-│   ├── eval/
 │   ├── tests/
-│   └── storage/
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── features/
-│   ├── hooks/
-│   ├── lib/
-│   ├── types/
-│   └── tests/
+│   ├── pyproject.toml
+│   └── requirements.txt
 └── docs/
-    ├── architecture.md
     ├── implementation-plan.md
-    ├── evaluation.md
     └── decisions/
 ```
 
 Directories should be added when their phase is implemented, not as empty placeholders.
+
+## Backend Setup
+
+```bash
+cd backend
+python -m pip install -e '.[dev]'
+uvicorn app.main:app --reload
+```
+
+The API will start on `http://127.0.0.1:8000` by default.
+
+Useful endpoints:
+
+- `GET /health`
+- `POST /documents` with a `file` upload field
+- `GET /documents/{document_id}`
+- `POST /documents/{document_id}/extract-clauses`
+- `GET /documents/{document_id}/clauses`
+
+The default `.env.example` uses `LLM_PROVIDER=fake` so local tests and demos do not require external credentials. To use Groq, set `LLM_PROVIDER=groq` and provide `GROQ_API_KEY` or `LLM_API_KEY`.
+
+OCR support requires system OCR tools in addition to Python packages:
+
+- Tesseract OCR.
+- Poppler utilities for `pdf2image`.
+
+Without those system tools, native PDF extraction still works and OCR fallback records a warning instead of silently pretending OCR succeeded.
+
+## Validation
+
+Run the backend checks from the `backend/` directory:
+
+```bash
+python -m ruff check .
+python -m mypy app
+pytest
+```
+
+Current local validation:
+
+- `python -m ruff check .`: passed.
+- `python -m mypy app`: passed for 51 source files.
+- `pytest`: 14 passed.
 
 ## Data And Citation Rules
 
@@ -142,9 +196,9 @@ Provider-specific credentials are required only for the active provider. Secrets
 
 ## Development Status
 
-Current phase: repository bootstrap and product documentation.
+Current phase: Phase 2 complete.
 
-Implementation modules have not been created yet. Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote.
+Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is QA, grounded citations, refusal behavior, and SSE.
 
 ## Git Workflow
 

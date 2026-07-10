@@ -1,8 +1,7 @@
 import re
 
 HEADING_PATTERN = re.compile(
-    r"^\s*((?:section\s+\d+(?:\.\d+)*)|(?:article\s+[ivxlcdm]+)|(?:\d+(?:\.\d+)*\.?)|(?:\([a-zivx]+\))|[A-Z][A-Z \-]{3,})\s*(.*)$",
-    re.IGNORECASE,
+    r"^\s*((?i:section\s+\d+(?:\.\d+)*)|(?i:article\s+[ivxlcdm]+)|(?:\d+(?:\.\d+)*\.?)|(?:\([a-zivx]+\))|[A-Z][A-Z \-]{3,})\s*(.*)$",
 )
 
 COMMON_HEADINGS = {

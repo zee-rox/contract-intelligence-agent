@@ -4,6 +4,8 @@ from app.agents.clause_extraction import extract_clauses_single_pass
 from app.chunking.service import create_candidate_chunks
 from app.config import Settings, get_settings
 from app.ingestion.service import parse_and_persist, register_document
+from app.retrieval.embeddings import HashEmbeddingService
+from app.retrieval.index import DocumentFaissIndex
 from app.schemas.api import DocumentIngestionResponse
 from app.schemas.clauses import ClauseExtractionResult
 from app.storage.repository import StorageRepository
@@ -21,7 +23,14 @@ class DocumentService:
         chunking_record = parsed.record.model_copy(update={"status": "chunking"})
         self.repository.save_manifest(chunking_record)
         self.repository.save_chunks(record.document_id, chunks)
-        ready = chunking_record.model_copy(update={"status": "ready"})
+        indexing_record = chunking_record.model_copy(update={"status": "indexing"})
+        self.repository.save_manifest(indexing_record)
+        index = DocumentFaissIndex(
+            self.repository,
+            HashEmbeddingService(self.settings.embedding_model, self.settings.embedding_dimension),
+        )
+        index.build_and_persist(record.document_id, chunks)
+        ready = indexing_record.model_copy(update={"status": "ready"})
         self.repository.save_manifest(ready)
         return DocumentIngestionResponse(document=ready, chunks=chunks)
 

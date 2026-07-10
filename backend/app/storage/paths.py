@@ -32,3 +32,15 @@ class StoragePaths:
 
     def clauses(self, document_id: UUID) -> Path:
         return self.document_dir(document_id) / "analysis" / "clauses.json"
+
+    def risks(self, document_id: UUID) -> Path:
+        return self.document_dir(document_id) / "analysis" / "risks.json"
+
+    def analysis_manifest(self, document_id: UUID) -> Path:
+        return self.document_dir(document_id) / "analysis" / "analysis-manifest.json"
+
+    def faiss_index(self, document_id: UUID) -> Path:
+        return self.document_dir(document_id) / "index" / "index.faiss"
+
+    def index_metadata(self, document_id: UUID) -> Path:
+        return self.document_dir(document_id) / "index" / "metadata.json"

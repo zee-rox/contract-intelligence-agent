@@ -1,4 +1,5 @@
 import json
+import re
 
 from app.config import Settings
 from app.llm.groq_provider import GroqProvider
@@ -11,6 +12,7 @@ class FakeProvider:
 
     def generate(self, messages: list[LLMMessage], *, temperature: float = 0.0) -> LLMResponse:
         text = "\n".join(message.content for message in messages)
+        chunk_blocks = re.findall(r"\[(chunk_[^\]]+)\]\n(.*?)(?=\n\n\[chunk_|\Z)", text, flags=re.DOTALL)
         clauses = []
         for heading, clause_type in [
             ("Termination", "termination"),
@@ -21,14 +23,19 @@ class FakeProvider:
             ("Indemnification", "indemnification"),
             ("Force Majeure", "force_majeure"),
         ]:
-            if heading.lower() in text.lower():
+            matching_block = next(
+                ((chunk_id, chunk_text.strip()) for chunk_id, chunk_text in chunk_blocks if heading.lower() in chunk_text.lower()),
+                None,
+            )
+            if matching_block:
+                chunk_id, chunk_text = matching_block
                 clauses.append(
                     {
                         "clause_type": clause_type,
                         "clause_heading": heading,
-                        "clause_text": heading,
-                        "source_chunk_ids": [],
-                        "confidence": "low",
+                        "clause_text": chunk_text,
+                        "source_chunk_ids": [chunk_id],
+                        "confidence": "medium",
                         "extraction_notes": "detected by deterministic fake provider",
                     }
                 )
