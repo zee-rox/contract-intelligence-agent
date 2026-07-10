@@ -193,8 +193,49 @@ Known limitations:
 
 ## Phase 6
 
-Status: not started.
+Status: completed.
 
 Scope:
 
 - Frontend.
+
+Completed work:
+
+- Added Next.js App Router frontend service.
+- Added typed backend API client.
+- Added upload workflow with processing states.
+- Added PDF viewer via React PDF with citation page highlight support.
+- Added DOCX extracted-text viewer with paragraph navigation and highlight support.
+- Added clause and risk summary panel.
+- Added grounded chat panel using SSE.
+- Added citation chips for source navigation.
+- Added distinct refused-answer rendering.
+- Added backend error rendering.
+- Added dark mode.
+- Added keyboard-accessible controls.
+- Added frontend tests for upload, major UI states, supported and refused questions, citation navigation, backend errors, keyboard dark mode, and critical accessibility violations.
+
+Validation commands:
+
+```bash
+cd frontend
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Known limitations:
+
+- Frontend tests mock backend responses and EventSource streams; end-to-end browser tests against a live backend are deferred.
+- `npm audit --omit=dev` reports a remaining moderate Next/PostCSS advisory whose suggested automatic fix is a breaking downgrade.
+
+## Phase 7
+
+Status: not started.
+
+Scope:
+
+- Docker.
+- Documentation.
+- Final polish.

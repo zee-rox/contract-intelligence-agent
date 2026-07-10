@@ -121,7 +121,24 @@ Phases 1 through 5 are implemented for the backend:
 - Generated `EVAL.md` with actual metrics and error analysis.
 - Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
 
-Frontend, Docker, and final deployment polish are intentionally not implemented yet.
+## Implemented Frontend Capabilities
+
+Phase 6 is implemented as a separate Next.js service:
+
+- Upload workflow for PDF and DOCX contracts.
+- Visible processing states for upload, extraction, analysis, and readiness.
+- PDF preview using React PDF with citation page highlighting.
+- DOCX extracted-text viewer with paragraph navigation and highlighting.
+- Clause summary and risk display.
+- Grounded chat panel using the backend SSE endpoint.
+- Citation chips that navigate to PDF pages or DOCX paragraphs.
+- Refusal messages rendered distinctly from supported answers.
+- Backend error display.
+- Dark mode toggle.
+- Keyboard-accessible controls and automated accessibility check for critical violations.
+- Frontend tests for upload, states, supported/refused answers, citation navigation, backend errors, and keyboard dark mode.
+
+Docker and final deployment polish are intentionally not implemented yet.
 
 ## Repository Structure
 
@@ -143,6 +160,15 @@ contract-intelligence-agent/
 │   ├── tests/
 │   ├── pyproject.toml
 │   └── requirements.txt
+├── frontend/
+│   ├── app/
+│   ├── components/
+│   ├── features/
+│   ├── lib/
+│   ├── tests/
+│   ├── types/
+│   ├── package.json
+│   └── tsconfig.json
 └── docs/
     ├── implementation-plan.md
     └── decisions/
@@ -181,6 +207,20 @@ OCR support requires system OCR tools in addition to Python packages:
 
 Without those system tools, native PDF extraction still works and OCR fallback records a warning instead of silently pretending OCR succeeded.
 
+## Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The frontend defaults to `http://127.0.0.1:8000` for the backend. Override it with:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+```
+
 ## Validation
 
 Run the backend checks from the `backend/` directory:
@@ -205,6 +245,14 @@ Current local validation:
 - `python -m mypy app`: passed for 61 source files.
 - `pytest`: 30 passed.
 - `python -m eval.runner`: completed on dataset `phase5-synthetic-v1`.
+- `cd frontend && npm run lint`: passed.
+- `cd frontend && npm run typecheck`: passed.
+- `cd frontend && npm test`: 5 passed.
+- `cd frontend && npm run build`: passed.
+
+Known frontend audit note:
+
+- `npm audit --omit=dev` currently reports a moderate advisory in Next.js' nested PostCSS dependency. The app is pinned to `next@15.5.20`, the patched version recommended by npm audit for the earlier critical Next advisories; the remaining audit recommendation suggests a breaking downgrade and was not applied.
 
 Latest evaluation results:
 
@@ -231,9 +279,9 @@ Provider-specific credentials are required only for the active provider. Secrets
 
 ## Development Status
 
-Current phase: Phase 5 complete.
+Current phase: Phase 6 complete.
 
-Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is the frontend.
+Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is Docker, documentation, and final polish.
 
 ## Git Workflow
 
