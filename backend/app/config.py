@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     embedding_device: str = "cpu"
     embedding_dimension: int = Field(default=64, ge=8, le=4096)
     retrieval_top_k: int = Field(default=5, ge=1, le=25)
-    retrieval_score_threshold: float = Field(default=0.1, ge=0, le=1)
+    retrieval_score_threshold: float = Field(default=0.05, ge=0, le=1)
     risk_baseline_version: str = "risk-baseline-v1"
 
     @field_validator("allowed_origins", mode="before")

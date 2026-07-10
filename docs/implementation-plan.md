@@ -68,7 +68,7 @@ Known limitations:
 
 ## Phase 3
 
-Status: not started.
+Status: completed.
 
 Scope:
 
@@ -76,3 +76,40 @@ Scope:
 - Grounded citation validation.
 - Refusal behavior.
 - SSE streaming.
+
+Completed work:
+
+- Added QA request, response, and citation schemas.
+- Added document-specific retrieval for question answering.
+- Added retrieval score threshold and lexical evidence guard.
+- Assigned citation IDs in application code from retrieved chunks.
+- Validated citation snippets as exact substrings of normalized chunk text.
+- Added one repair path for model responses that reference unknown citation IDs.
+- Added refusal responses for insufficient evidence and retrieval failures.
+- Added prompt-injection marker filtering before citation creation.
+- Added structured `POST /documents/{document_id}/questions`.
+- Added SSE `GET /documents/{document_id}/questions/stream`.
+- Added API contract tests for answerable questions, absent information, prompt injection, document isolation, and SSE final events.
+
+Validation commands:
+
+```bash
+cd backend
+python -m ruff check .
+python -m mypy app
+pytest
+```
+
+Known limitations:
+
+- The QA worker currently uses deterministic grounded synthesis over retrieved snippets rather than an external model prompt.
+- SSE cancellation is handled by checking request disconnection before emitting each event; there is no long-running token stream yet.
+
+## Phase 4
+
+Status: not started.
+
+Scope:
+
+- Structured output hardening.
+- Operational reliability.

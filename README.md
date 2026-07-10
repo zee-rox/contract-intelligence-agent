@@ -105,9 +105,14 @@ Phases 1 and 2 are implemented for the backend:
 - LangGraph analysis supervisor that runs clause extraction before risk assessment.
 - Versioned risk baseline with persisted risk explanations.
 - Clause analysis API that reloads persisted analysis results on repeat requests.
+- Document-specific question answering with retrieval thresholds.
+- Application-owned citation IDs and exact snippet validation.
+- Refusal behavior for unsupported questions.
+- Prompt-injection marker filtering before citation use.
+- SSE streaming for structured QA responses.
 - Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
 
-Question answering, grounded citation validation, SSE streaming, evaluation harnesses, frontend, Docker, and llama.cpp support are intentionally not implemented yet.
+Evaluation harnesses, frontend, Docker, structured output hardening, operational reliability work, and llama.cpp support are intentionally not implemented yet.
 
 ## Repository Structure
 
@@ -152,6 +157,8 @@ Useful endpoints:
 - `GET /documents/{document_id}`
 - `POST /documents/{document_id}/extract-clauses`
 - `GET /documents/{document_id}/clauses`
+- `POST /documents/{document_id}/questions`
+- `GET /documents/{document_id}/questions/stream?question=...`
 
 The default `.env.example` uses `LLM_PROVIDER=fake` so local tests and demos do not require external credentials. To use Groq, set `LLM_PROVIDER=groq` and provide `GROQ_API_KEY` or `LLM_API_KEY`.
 
@@ -175,8 +182,8 @@ pytest
 Current local validation:
 
 - `python -m ruff check .`: passed.
-- `python -m mypy app`: passed for 51 source files.
-- `pytest`: 14 passed.
+- `python -m mypy app`: passed for 55 source files.
+- `pytest`: 21 passed.
 
 ## Data And Citation Rules
 
@@ -196,9 +203,9 @@ Provider-specific credentials are required only for the active provider. Secrets
 
 ## Development Status
 
-Current phase: Phase 2 complete.
+Current phase: Phase 3 complete.
 
-Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is QA, grounded citations, refusal behavior, and SSE.
+Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is structured output hardening and operational reliability.
 
 ## Git Workflow
 

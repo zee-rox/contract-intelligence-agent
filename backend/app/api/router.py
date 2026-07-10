@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import clauses, documents
+from app.api.routes import clauses, documents, questions
 
 api_router = APIRouter()
 
@@ -12,3 +12,4 @@ def health() -> dict[str, str]:
 
 api_router.include_router(documents.router, prefix="/documents", tags=["documents"])
 api_router.include_router(clauses.router)
+api_router.include_router(questions.router)
