@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = Field(default=25, ge=1, le=200)
     allowed_origins: list[str] = ["http://localhost:3000"]
 
-    llm_provider: Literal["groq", "fake", "llamacpp"] = "fake"
+    llm_provider: Literal["groq", "openrouter", "fake", "llamacpp"] = "fake"
     llm_model: str = "llama-3.1-8b-instant"
     llm_api_key: str | None = None
     llm_base_url: str | None = None
@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     llm_max_retries: int = Field(default=1, ge=0, le=5)
     llm_max_concurrency: int = Field(default=4, ge=1, le=32)
     groq_api_key: str | None = None
+    openrouter_api_key: str | None = None
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
+    openrouter_http_referer: str | None = None
+    openrouter_app_title: str = "Contract Intelligence Agent"
     llamacpp_base_url: str | None = None
 
     ocr_enabled: bool = True
@@ -55,6 +59,8 @@ class Settings(BaseSettings):
 
     @property
     def active_llm_api_key(self) -> str | None:
+        if self.llm_provider == "openrouter":
+            return self.llm_api_key or self.openrouter_api_key
         return self.llm_api_key or self.groq_api_key
 
     def safe_summary(self) -> dict[str, str | int | float | bool | list[str]]:

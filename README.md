@@ -29,14 +29,14 @@ The backend is a FastAPI service that validates uploads, extracts text with sour
 
 The frontend is a Next.js App Router application with a responsive document viewer, clause summary, risk badges, streamed chat, citation chips, and mobile document/analysis tabs.
 
-The default local model provider is `fake`, which makes the project runnable and testable without external credentials. Groq and llama.cpp-compatible OpenAI-style providers are supported through configuration.
+The default local model provider is `fake`, which makes the project runnable and testable without external credentials. Groq, OpenRouter, and llama.cpp-compatible OpenAI-style providers are supported through configuration.
 
 ## Quick Start With Docker
 
 Prerequisites:
 
 - Docker and Docker Compose.
-- Optional: a Groq API key or a running llama.cpp-compatible server if you want a real LLM provider.
+- Optional: a Groq or OpenRouter API key, or a running llama.cpp-compatible server, if you want a real LLM provider.
 
 Start the full stack:
 
@@ -100,8 +100,10 @@ Important settings:
 
 | Variable | Purpose |
 | --- | --- |
-| `LLM_PROVIDER` | `fake`, `groq`, or `llamacpp`. |
+| `LLM_PROVIDER` | `fake`, `groq`, `openrouter`, or `llamacpp`. |
 | `GROQ_API_KEY` / `LLM_API_KEY` | Secret used only when the active provider requires it. |
+| `OPENROUTER_API_KEY` | OpenRouter key used when `LLM_PROVIDER=openrouter`. |
+| `OPENROUTER_BASE_URL` | OpenRouter OpenAI-compatible API base URL. |
 | `LLAMACPP_BASE_URL` | OpenAI-compatible llama.cpp base URL. |
 | `STORAGE_ROOT` | Backend artifact storage location. Compose overrides this to `/app/storage`. |
 | `ALLOWED_ORIGINS` | JSON array of frontend origins allowed by CORS. |
@@ -109,6 +111,14 @@ Important settings:
 | `OCR_ENABLED` | Enables selective OCR fallback. |
 
 Do not commit real secrets. `.env.example` contains safe placeholders only.
+
+OpenRouter example:
+
+```env
+LLM_PROVIDER=openrouter
+LLM_MODEL=openai/gpt-4o-mini
+OPENROUTER_API_KEY=your_openrouter_api_key_here
+```
 
 ## API Overview
 

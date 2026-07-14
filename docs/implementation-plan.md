@@ -15,6 +15,7 @@ Scope:
 - Clause-aware candidate chunking.
 - Provider-independent LLM interface.
 - Groq provider.
+- OpenRouter provider.
 - Structured clause extraction with deterministic fallback.
 - Unit and integration tests.
 
@@ -162,6 +163,7 @@ Completed work:
 - Added machine-readable output at `backend/eval/results/latest.json`.
 - Added generated `EVAL.md` with actual results and issue details.
 - Added Groq/fake/llama.cpp provider abstraction support and llama.cpp provider path test.
+- Added OpenRouter provider support through the same internal LLM provider interface.
 - Added provider comparison section that records skipped llama.cpp runs instead of inventing results.
 
 Latest generated results:

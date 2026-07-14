@@ -5,6 +5,7 @@ from app.config import Settings
 from app.llm.groq_provider import GroqProvider
 from app.llm.interface import LLMMessage, LLMProvider, LLMResponse
 from app.llm.llamacpp_provider import LlamaCppProvider
+from app.llm.openrouter_provider import OpenRouterProvider
 
 
 class FakeProvider:
@@ -46,6 +47,8 @@ class FakeProvider:
 def build_llm_provider(settings: Settings) -> LLMProvider:
     if settings.llm_provider == "groq":
         return GroqProvider(settings)
+    if settings.llm_provider == "openrouter":
+        return OpenRouterProvider(settings)
     if settings.llm_provider == "llamacpp":
         return LlamaCppProvider(settings)
     return FakeProvider()
