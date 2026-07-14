@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from langgraph.graph import END, StateGraph
@@ -8,6 +9,8 @@ from app.agents.state import AnalysisState
 from app.config import Settings
 from app.schemas.analysis import AnalysisManifest, ClauseAnalysisResult
 from app.schemas.chunks import CandidateChunk
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisSupervisor:
@@ -45,6 +48,7 @@ class AnalysisSupervisor:
 
     def _extract_node(self, state: AnalysisState) -> AnalysisState:
         result = extract_clauses_single_pass(state["document_id"], state["chunks"], self.settings)
+        logger.info("analysis extraction completed clauses=%s fallback=%s", len(result.clauses), result.fallback_used)
         return {"clause_result": result, "stage": "clauses_extracted"}
 
     def _risk_node(self, state: AnalysisState) -> AnalysisState:
@@ -55,4 +59,5 @@ class AnalysisSupervisor:
                 risks.append(assess_clause_risk(clause, self.settings.risk_baseline_version))
             except Exception as exc:  # pragma: no cover - defensive route for malformed future providers
                 warnings.append(f"risk assessment failed for {clause.clause_id}: {exc}")
+        logger.info("analysis risk assessment completed risks=%s", len(risks))
         return {"risks": risks, "warnings": warnings, "stage": "risks_assessed"}

@@ -1,4 +1,5 @@
 import json
+import logging
 from threading import BoundedSemaphore
 
 import httpx
@@ -6,6 +7,8 @@ import httpx
 from app.config import Settings
 from app.llm.errors import LLMProviderError
 from app.llm.interface import LLMMessage, LLMResponse
+
+logger = logging.getLogger(__name__)
 
 
 class OpenRouterProvider:
@@ -55,5 +58,8 @@ class OpenRouterProvider:
                 raise LLMProviderError("OpenRouter request timed out after bounded retries") from last_error
         if response.status_code >= 400:
             raise LLMProviderError(f"OpenRouter request failed with status {response.status_code}")
+        logger.info("OpenRouter response received status=%s bytes=%s", response.status_code, len(response.content))
         data = response.json()
-        return LLMResponse(content=data["choices"][0]["message"]["content"], provider=self.provider_name, model=self.model)
+        content = data["choices"][0]["message"]["content"]
+        logger.info("OpenRouter message parsed chars=%s", len(content))
+        return LLMResponse(content=content, provider=self.provider_name, model=self.model)

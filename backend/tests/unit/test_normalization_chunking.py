@@ -1,6 +1,7 @@
 from uuid import uuid4
 
 from app.chunking.service import create_candidate_chunks
+from app.chunking.fallback_splitter import split_long_text
 from app.ingestion.normalization import normalize_text
 from app.schemas.documents import ExtractedParagraph
 from app.schemas.sources import DocxSourceLocator
@@ -25,3 +26,13 @@ def test_candidate_chunks_are_deterministic() -> None:
     second = create_candidate_chunks(document_id, [], [paragraph])
     assert [chunk.chunk_id for chunk in first] == [chunk.chunk_id for chunk in second]
     assert first[0].detected_heading == "Termination\nEither party may terminate on thirty days notice."
+
+
+def test_split_long_text_does_not_emit_shrinking_suffix_chunks() -> None:
+    text = ("Alpha sentence. " * 140).strip()
+
+    parts = split_long_text(text, max_chars=1800, overlap=120)
+
+    assert len(parts) == 2
+    assert all(len(part) > 100 for part in parts)
+    assert parts[-1].endswith("Alpha sentence.")

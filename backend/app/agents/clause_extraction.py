@@ -1,4 +1,5 @@
 import json
+import logging
 from uuid import UUID
 
 from app.config import Settings
@@ -7,6 +8,8 @@ from app.llm.interface import LLMMessage
 from app.llm.structured_output import parse_clause_json
 from app.schemas.chunks import CandidateChunk
 from app.schemas.clauses import ClauseExtractionResult, ClauseType, ExtractedClause
+
+logger = logging.getLogger(__name__)
 
 KEYWORDS: list[tuple[str, ClauseType]] = [
     ("termination", "termination"),
@@ -61,6 +64,7 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
     response_provider = provider.provider_name
     response_model = provider.model
     try:
+        logger.info("clause extraction started chunks=%s provider=%s", len(chunks), provider.provider_name)
         response = provider.generate(
             [LLMMessage(role="system", content=prompt), LLMMessage(role="user", content=context)],
             temperature=0.0,
@@ -69,6 +73,7 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
         response_model = response.model
         try:
             clauses = parse_clause_json(response.content, document_id, chunks)
+            logger.info("clause extraction parsed clauses=%s", len(clauses))
         except json.JSONDecodeError:
             correction = provider.generate(
                 [
@@ -80,6 +85,7 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
             response_provider = correction.provider
             response_model = correction.model
             clauses = parse_clause_json(correction.content, document_id, chunks)
+            logger.info("clause extraction correction parsed clauses=%s", len(clauses))
         if not clauses:
             raise ValueError("provider returned no valid clauses")
     except (json.JSONDecodeError, ValueError) as exc:

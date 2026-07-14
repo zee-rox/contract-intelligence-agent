@@ -13,6 +13,7 @@ def parse_clause_json(payload: str, document_id: UUID, chunks: list[CandidateChu
     clauses: list[ExtractedClause] = []
     for index, item in enumerate(data.get("clauses", [])):
         source_ids = item.get("source_chunk_ids") or []
+        source_ids = [chunk_id for chunk_id in source_ids if chunk_id in chunk_by_id]
         if not source_ids:
             source_ids = [chunk.chunk_id for chunk in chunks if item.get("clause_heading", "").lower() in chunk.normalized_text.lower()]
         if not source_ids and chunks:

@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from app.agents.supervisor import AnalysisSupervisor
@@ -6,6 +7,8 @@ from app.schemas.analysis import ClauseAnalysisResult
 from app.schemas.clauses import ClauseExtractionResult
 from app.storage.locking import document_lock
 from app.storage.repository import StorageRepository
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisService:
@@ -27,10 +30,17 @@ class AnalysisService:
                 )
             except FileNotFoundError:
                 chunks = self.repository.load_chunks(document_id)
+                logger.info("analysis started document_id=%s chunks=%s", document_id, len(chunks))
                 result = AnalysisSupervisor(self.settings).run(document_id, chunks)
                 self.repository.save_clause_result(self._clause_result_from_analysis(result))
                 self.repository.save_risks(document_id, result.risks)
                 self.repository.save_analysis_manifest(result.manifest)
+                logger.info(
+                    "analysis persisted document_id=%s clauses=%s risks=%s",
+                    document_id,
+                    len(result.clauses),
+                    len(result.risks),
+                )
                 return result
 
     def _clause_result_from_analysis(self, result: ClauseAnalysisResult) -> ClauseExtractionResult:
