@@ -48,7 +48,7 @@ Question
 - `app/chunking`: deterministic candidate span generation.
 - `app/retrieval`: deterministic embeddings, FAISS persistence, metadata validation, and search.
 - `app/agents`: clause extraction, risk assessment, QA, and LangGraph supervision.
-- `app/llm`: provider-independent LLM interface plus fake, Groq, OpenRouter, and llama.cpp-compatible providers.
+- `app/llm`: provider-independent LLM interface plus fake, Gemini, OpenRouter, and llama.cpp-compatible providers.
 - `app/storage`: deterministic paths, atomic writes, repository loading, and per-document locks.
 - `eval`: versioned dataset, metrics, runner, and report generation.
 

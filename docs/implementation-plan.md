@@ -14,7 +14,7 @@ Scope:
 - Text normalization.
 - Clause-aware candidate chunking.
 - Provider-independent LLM interface.
-- Groq provider.
+- Gemini provider.
 - OpenRouter provider.
 - Structured clause extraction with deterministic fallback.
 - Unit and integration tests.
@@ -123,7 +123,7 @@ Completed work:
 - Added per-document in-process locks for ingestion, extraction, and analysis.
 - Added index metadata artifact versioning and corrupt metadata detection.
 - Added FAISS/index metadata consistency checks.
-- Added bounded Groq timeout retries and concurrency limiting.
+- Added bounded Gemini timeout retries and concurrency limiting.
 - Added secret-safe settings summaries for diagnostics.
 - Ensured failed indexing leaves the document manifest in `failed`, not `ready`.
 - Added tests for interrupted writes, provider timeouts, duplicate analysis requests, corrupt metadata, secret redaction, and partial indexing failure.
@@ -161,8 +161,8 @@ Completed work:
 - Added OCR metric reporting with explicit no-OCR-fixture status.
 - Added performance timing.
 - Added machine-readable output at `backend/eval/results/latest.json`.
-- Added generated `EVAL.md` with actual results and issue details.
-- Added Groq/fake/llama.cpp provider abstraction support and llama.cpp provider path test.
+- Added generated evaluation reporting with actual results and issue details.
+- Added Gemini/fake/llama.cpp provider abstraction support and llama.cpp provider path test.
 - Added OpenRouter provider support through the same internal LLM provider interface.
 - Added provider comparison section that records skipped llama.cpp runs instead of inventing results.
 

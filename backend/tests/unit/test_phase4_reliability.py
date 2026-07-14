@@ -1,14 +1,14 @@
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Any
 
-import httpx
 import pytest
 from docx import Document
 from fastapi.testclient import TestClient
 
 from app.config import Settings, get_settings
 from app.llm.errors import LLMProviderError
-from app.llm.groq_provider import GroqProvider
+from app.llm.gemini_provider import GeminiProvider
 from app.schemas.analysis import AnalysisManifest, ClauseAnalysisResult
 from app.schemas.clauses import ExtractedClause
 from app.schemas.risks import RiskAssessment
@@ -44,17 +44,27 @@ def test_interrupted_atomic_write_keeps_existing_file_and_removes_temp(tmp_path,
     assert [path for path in tmp_path.iterdir() if path.name != "artifact.json"] == []
 
 
-def test_groq_provider_retries_timeouts_with_bound(monkeypatch) -> None:
-    settings = Settings(llm_provider="groq", groq_api_key="secret", llm_max_retries=2, llm_timeout_seconds=0.1)
-    provider = GroqProvider(settings)
+def test_gemini_provider_retries_timeouts_with_bound(monkeypatch) -> None:
+    settings = Settings(llm_provider="gemini", google_api_key="secret", llm_max_retries=2, llm_timeout_seconds=0.1)
+    provider = GeminiProvider(settings)
     calls = 0
 
-    def timeout(*args, **kwargs):
-        nonlocal calls
-        calls += 1
-        raise httpx.TimeoutException("timeout")
+    class TimeoutChat:
+        def __init__(self, **kwargs: Any) -> None:
+            self.kwargs = kwargs
 
-    monkeypatch.setattr("app.llm.groq_provider.httpx.post", timeout)
+        def invoke(self, messages: list[Any]) -> object:
+            nonlocal calls
+            calls += 1
+            raise TimeoutError("timeout")
+
+    def fake_chat_model(**kwargs: Any) -> TimeoutChat:
+        assert kwargs["model"] == "gemini-2.5-flash"
+        assert kwargs["api_key"] == "secret"
+        assert kwargs["max_retries"] == 0
+        return TimeoutChat(**kwargs)
+
+    monkeypatch.setattr("app.llm.gemini_provider.ChatGoogleGenerativeAI", fake_chat_model)
 
     with pytest.raises(LLMProviderError):
         provider.generate([])
@@ -62,14 +72,60 @@ def test_groq_provider_retries_timeouts_with_bound(monkeypatch) -> None:
     assert calls == 3
 
 
+def test_gemini_provider_returns_text_response(monkeypatch) -> None:
+    class TextResponse:
+        text = '{"clauses": []}'
+
+    class TextChat:
+        def __init__(self, **kwargs: Any) -> None:
+            self.kwargs = kwargs
+
+        def invoke(self, messages: list[Any]) -> object:
+            return TextResponse()
+
+    def fake_chat_model(**kwargs: Any) -> TextChat:
+        return TextChat(**kwargs)
+
+    monkeypatch.setattr("app.llm.gemini_provider.ChatGoogleGenerativeAI", fake_chat_model)
+    provider = GeminiProvider(Settings(llm_provider="gemini", gemini_api_key="secret"))
+    response = provider.generate([])
+
+    assert response.provider == "gemini"
+    assert response.content == '{"clauses": []}'
+
+
+def test_gemini_provider_extracts_text_from_content_blocks(monkeypatch) -> None:
+    class BlockResponse:
+        text = ""
+        content = [{"type": "text", "text": '{"clauses": []}'}, {"type": "text", "text": "\n"}]
+
+    class BlockChat:
+        def __init__(self, **kwargs: Any) -> None:
+            self.kwargs = kwargs
+
+        def invoke(self, messages: list[Any]) -> object:
+            return BlockResponse()
+
+    def fake_chat_model(**kwargs: Any) -> BlockChat:
+        return BlockChat(**kwargs)
+
+    monkeypatch.setattr("app.llm.gemini_provider.ChatGoogleGenerativeAI", fake_chat_model)
+    provider = GeminiProvider(Settings(llm_provider="gemini", gemini_api_key="secret"))
+    response = provider.generate([])
+
+    assert response.content == '{"clauses": []}\n'
+
+
 def test_safe_settings_summary_does_not_include_secret_values() -> None:
-    settings = Settings(llm_api_key="llm-secret", groq_api_key="groq-secret")
+    settings = Settings(llm_api_key="llm-secret", google_api_key="google-secret", gemini_api_key="gemini-secret")
     summary = settings.safe_summary()
 
     assert "llm_api_key" not in summary
-    assert "groq_api_key" not in summary
+    assert "google_api_key" not in summary
+    assert "gemini_api_key" not in summary
     assert "llm-secret" not in str(summary)
-    assert "groq-secret" not in str(summary)
+    assert "google-secret" not in str(summary)
+    assert "gemini-secret" not in str(summary)
 
 
 def test_failed_indexing_does_not_leave_ready_manifest(tmp_path, monkeypatch) -> None:

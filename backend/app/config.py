@@ -17,14 +17,18 @@ class Settings(BaseSettings):
     max_upload_size_mb: int = Field(default=25, ge=1, le=200)
     allowed_origins: list[str] = ["http://localhost:3000"]
 
-    llm_provider: Literal["groq", "openrouter", "fake", "llamacpp"] = "fake"
-    llm_model: str = "llama-3.1-8b-instant"
+    llm_provider: Literal["gemini", "openrouter", "fake", "llamacpp"] = "fake"
+    llm_model: str = "gemini-2.5-flash"
     llm_api_key: str | None = None
     llm_base_url: str | None = None
     llm_timeout_seconds: float = Field(default=30.0, gt=0, le=120)
     llm_max_retries: int = Field(default=1, ge=0, le=5)
     llm_max_concurrency: int = Field(default=4, ge=1, le=32)
-    groq_api_key: str | None = None
+    google_api_key: str | None = None
+    gemini_api_key: str | None = None
+    google_genai_use_vertexai: bool = False
+    google_cloud_project: str | None = None
+    google_cloud_location: str = "us-central1"
     openrouter_api_key: str | None = None
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     openrouter_http_referer: str | None = None
@@ -61,7 +65,9 @@ class Settings(BaseSettings):
     def active_llm_api_key(self) -> str | None:
         if self.llm_provider == "openrouter":
             return self.llm_api_key or self.openrouter_api_key
-        return self.llm_api_key or self.groq_api_key
+        if self.llm_provider == "gemini":
+            return self.llm_api_key or self.google_api_key or self.gemini_api_key
+        return self.llm_api_key
 
     def safe_summary(self) -> dict[str, str | int | float | bool | list[str]]:
         return {
@@ -74,7 +80,7 @@ class Settings(BaseSettings):
             "allowed_origins": self.allowed_origins,
             "llm_provider": self.llm_provider,
             "llm_model": self.llm_model,
-            "llm_base_url": self.llm_base_url or self.llamacpp_base_url or "",
+            "llm_base_url": self.llm_base_url or self.openrouter_base_url or self.llamacpp_base_url or "",
             "llm_timeout_seconds": self.llm_timeout_seconds,
             "llm_max_retries": self.llm_max_retries,
             "llm_max_concurrency": self.llm_max_concurrency,

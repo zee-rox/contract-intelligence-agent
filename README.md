@@ -29,14 +29,14 @@ The backend is a FastAPI service that validates uploads, extracts text with sour
 
 The frontend is a Next.js App Router application with a responsive document viewer, clause summary, risk badges, streamed chat, citation chips, and mobile document/analysis tabs.
 
-The default local model provider is `fake`, which makes the project runnable and testable without external credentials. Groq, OpenRouter, and llama.cpp-compatible OpenAI-style providers are supported through configuration.
+The default local model provider is `fake`, which makes the project runnable and testable without external credentials. Gemini, OpenRouter, and llama.cpp-compatible OpenAI-style providers are supported through configuration.
 
 ## Quick Start With Docker
 
 Prerequisites:
 
 - Docker and Docker Compose.
-- Optional: a Groq or OpenRouter API key, or a running llama.cpp-compatible server, if you want a real LLM provider.
+- Optional: a Google Gemini or OpenRouter API key, or a running llama.cpp-compatible server, if you want a real LLM provider.
 
 Start the full stack:
 
@@ -100,8 +100,11 @@ Important settings:
 
 | Variable | Purpose |
 | --- | --- |
-| `LLM_PROVIDER` | `fake`, `groq`, `openrouter`, or `llamacpp`. |
-| `GROQ_API_KEY` / `LLM_API_KEY` | Secret used only when the active provider requires it. |
+| `LLM_PROVIDER` | `fake`, `gemini`, `openrouter`, or `llamacpp`. |
+| `GOOGLE_API_KEY` / `GEMINI_API_KEY` / `LLM_API_KEY` | Secret used when `LLM_PROVIDER=gemini`. |
+| `GOOGLE_GENAI_USE_VERTEXAI` | Set to `true` to use Gemini through Vertex AI. |
+| `GOOGLE_CLOUD_PROJECT` | Google Cloud project used for Vertex AI. |
+| `GOOGLE_CLOUD_LOCATION` | Google Cloud region for Vertex AI, defaulting to `us-central1`. |
 | `OPENROUTER_API_KEY` | OpenRouter key used when `LLM_PROVIDER=openrouter`. |
 | `OPENROUTER_BASE_URL` | OpenRouter OpenAI-compatible API base URL. |
 | `LLAMACPP_BASE_URL` | OpenAI-compatible llama.cpp base URL. |
@@ -111,6 +114,24 @@ Important settings:
 | `OCR_ENABLED` | Enables selective OCR fallback. |
 
 Do not commit real secrets. `.env.example` contains safe placeholders only.
+
+Gemini example:
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini-2.5-flash
+GOOGLE_API_KEY=your_google_ai_api_key_here
+```
+
+Vertex AI example:
+
+```env
+LLM_PROVIDER=gemini
+LLM_MODEL=gemini-2.5-flash
+GOOGLE_GENAI_USE_VERTEXAI=true
+GOOGLE_CLOUD_PROJECT=your-project-id
+GOOGLE_CLOUD_LOCATION=us-central1
+```
 
 OpenRouter example:
 
@@ -145,7 +166,7 @@ python -m eval.runner
 
 The command writes:
 
-- Human-readable results: `EVAL.md`
+- Human-readable results: generated locally with `python -m eval.runner`.
 - Machine-readable results: `backend/eval/results/latest.json`
 
 Latest checked-in results from dataset `phase5-synthetic-v1`:
@@ -158,7 +179,7 @@ Latest checked-in results from dataset `phase5-synthetic-v1`:
 | Refusal accuracy | 0.75 |
 | OCR evaluated pages | 0 |
 
-See [EVAL.md](EVAL.md) and [docs/evaluation.md](docs/evaluation.md) for details and known limitations.
+See [docs/evaluation.md](docs/evaluation.md) for details and known limitations.
 
 ## Validation
 

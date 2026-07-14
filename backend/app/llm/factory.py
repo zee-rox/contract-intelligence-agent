@@ -2,7 +2,7 @@ import json
 import re
 
 from app.config import Settings
-from app.llm.groq_provider import GroqProvider
+from app.llm.gemini_provider import GeminiProvider
 from app.llm.interface import LLMMessage, LLMProvider, LLMResponse
 from app.llm.llamacpp_provider import LlamaCppProvider
 from app.llm.openrouter_provider import OpenRouterProvider
@@ -45,8 +45,8 @@ class FakeProvider:
 
 
 def build_llm_provider(settings: Settings) -> LLMProvider:
-    if settings.llm_provider == "groq":
-        return GroqProvider(settings)
+    if settings.llm_provider == "gemini":
+        return GeminiProvider(settings)
     if settings.llm_provider == "openrouter":
         return OpenRouterProvider(settings)
     if settings.llm_provider == "llamacpp":

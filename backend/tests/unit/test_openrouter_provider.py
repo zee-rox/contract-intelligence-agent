@@ -11,6 +11,7 @@ def test_openrouter_provider_uses_openai_compatible_chat_endpoint(monkeypatch: A
 
     class Response:
         status_code = 200
+        content = b'{"choices":[{"message":{"content":"{\\"clauses\\":[]}"}}]}'
 
         def json(self) -> dict[str, list[dict[str, dict[str, str]]]]:
             return {"choices": [{"message": {"content": "{\"clauses\": []}"}}]}
