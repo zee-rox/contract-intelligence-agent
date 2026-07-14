@@ -109,7 +109,7 @@ describe("ContractWorkspace", () => {
     });
 
     render(<ContractWorkspace />);
-    const fileInput = screen.getByLabelText(/upload pdf or docx/i);
+    const fileInput = screen.getByLabelText(/choose pdf/i);
     await userEvent.upload(
       fileInput,
       new File(["contract"], "sample.docx", {
@@ -117,8 +117,8 @@ describe("ContractWorkspace", () => {
       })
     );
 
-    expect(await screen.findByText("payment terms")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: /locate/i }));
+    expect((await screen.findAllByText("Payment")).length).toBeGreaterThan(0);
+    await userEvent.click(screen.getByRole("button", { name: /payment/i }));
     expect(screen.getByText(/Paragraph 1/i).parentElement).toHaveClass("citation-highlight");
   });
 
@@ -136,12 +136,12 @@ describe("ContractWorkspace", () => {
 
     render(<ContractWorkspace />);
     await userEvent.upload(
-      screen.getByLabelText(/upload pdf or docx/i),
+      screen.getByLabelText(/choose pdf/i),
       new File(["contract"], "sample.docx", {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       })
     );
-    await screen.findByText("payment terms");
+    await screen.findAllByText("Payment");
 
     await userEvent.type(screen.getByLabelText(/ask a grounded question/i), "When are invoices due?");
     await userEvent.click(screen.getByRole("button", { name: /send question/i }));
@@ -170,7 +170,7 @@ describe("ContractWorkspace", () => {
       });
     });
 
-    await waitFor(() => expect(screen.getAllByText(/cit_0000/i).length).toBeGreaterThan(0));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: /show citation cit_0000/i }).length).toBeGreaterThan(0));
 
     await userEvent.type(screen.getByLabelText(/ask a grounded question/i), "What insurance is required?");
     await userEvent.click(screen.getByRole("button", { name: /send question/i }));
@@ -202,17 +202,17 @@ describe("ContractWorkspace", () => {
     );
 
     render(<ContractWorkspace />);
-    await userEvent.upload(screen.getByLabelText(/upload pdf or docx/i), new File(["%PDF"], "bad.pdf", { type: "application/pdf" }));
+    await userEvent.upload(screen.getByLabelText(/choose pdf/i), new File(["%PDF"], "bad.pdf", { type: "application/pdf" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(/unsupported file type/i);
+    expect((await screen.findAllByText(/unsupported file type/i)).length).toBeGreaterThan(0);
   });
 
-  it("toggles dark mode from the keyboard", async () => {
+  it("switches between mobile workspace tabs from the keyboard", async () => {
     render(<ContractWorkspace />);
-    const toggle = screen.getByRole("button", { name: /switch to dark mode/i });
-    toggle.focus();
+    const analysisTab = screen.getByRole("tab", { name: /analysis/i });
+    analysisTab.focus();
     await userEvent.keyboard("{Enter}");
-    await waitFor(() => expect(document.documentElement).toHaveClass("dark"));
+    expect(analysisTab).toHaveAttribute("aria-selected", "true");
   });
 
   it("has no critical accessibility violations in the empty workspace", async () => {
