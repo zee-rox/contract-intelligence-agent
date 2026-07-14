@@ -1,294 +1,220 @@
 # Contract Intelligence Agent
 
-Contract Intelligence Agent is a production-oriented portfolio project for clause-aware contract analysis. It is intended to ingest PDF and DOCX contracts, preserve source locations, identify contractual clauses, assess potential risk, build a document-specific semantic index, and answer questions only when the uploaded contract provides enough evidence.
+Contract Intelligence Agent is a clause-aware contract review workspace for PDF and DOCX agreements. It ingests a contract, preserves source locations, extracts contractual clauses, assesses clause-level risk, builds a document-specific FAISS retrieval index, and answers questions using only evidence found in the uploaded document.
 
-This is not legal advice software. Risk summaries are informational, should be treated as automated review assistance, and must not replace review by a qualified legal professional.
+This is a production-oriented portfolio project, not legal advice software. Risk summaries are informational and should not replace qualified legal review.
 
-## Product Goals
+## Highlights
 
-The finished application will transform each uploaded contract into:
+- Upload PDF and DOCX contracts through a polished two-pane web workspace.
+- Preserve PDF page and DOCX paragraph citations for every material answer.
+- Extract clauses into a fixed taxonomy, then run clause-level risk assessment.
+- Use one FAISS index per document to avoid cross-document leakage.
+- Refuse unsupported questions instead of guessing.
+- Stream grounded question-answering responses over Server-Sent Events.
+- Run a reproducible evaluation harness with actual measured results.
+- Start the full stack with Docker Compose using a persistent local storage volume.
 
-- A normalized document representation with traceable source locations.
-- Candidate text spans for retrieval and clause extraction.
-- Authoritative extracted clauses using a fixed clause taxonomy.
-- Clause-level risk assessments with observed and missing factors.
-- A per-document FAISS semantic search index.
-- Grounded question-answering responses with exact citations.
-- Refusals when the contract does not support an answer.
-- A polished web interface for upload, analysis, citation browsing, and streamed QA.
-- A reproducible evaluation harness with measured results.
+## Screenshots
 
-The project is intentionally more than a basic "chat with PDF" app. Its defining behaviors are clause-aware processing, structured validation, risk reasoning, citation validation, refusal handling, document isolation, visible error states, and measured evaluation.
+<p>
+  <img src="docs/designs/Desktop%20%E2%80%A2%20Ready.png" alt="Ready contract review workspace" width="31%" />
+  <img src="docs/designs/Desktop%20%E2%80%A2%20Processing.png" alt="Processing state" width="31%" />
+  <img src="docs/designs/Desktop%20%E2%80%A2%20Empty.png" alt="Empty upload state" width="31%" />
+</p>
 
-## Core Architecture
+## How It Works
 
-The system is planned as two separate services:
+The backend is a FastAPI service that validates uploads, extracts text with source locations, selectively falls back to OCR for weak PDF pages, chunks candidate spans, creates a per-document FAISS index, extracts clauses, assesses risks, and answers grounded questions.
 
-- `backend/`: FastAPI, Pydantic v2, PyMuPDF, python-docx, OCR fallback, Sentence Transformers, FAISS, LangGraph orchestration, structured logging, and pytest.
-- `frontend/`: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, React PDF, Framer Motion, Lucide React, typed HTTP clients, and SSE for streamed responses.
+The frontend is a Next.js App Router application with a responsive document viewer, clause summary, risk badges, streamed chat, citation chips, and mobile document/analysis tabs.
 
-Backend and frontend communicate through documented HTTP and SSE contracts. The application must not be implemented as Streamlit, Gradio, or a single-process demo.
+The default local model provider is `fake`, which makes the project runnable and testable without external credentials. Groq and llama.cpp-compatible OpenAI-style providers are supported through configuration.
 
-## Processing Flow
+## Quick Start With Docker
 
-Upload and ingestion:
+Prerequisites:
 
-```text
-File upload
-  -> file validation
-  -> document registration
-  -> source persistence
-  -> PDF or DOCX parsing
-  -> per-page OCR fallback when required
-  -> text normalization
-  -> candidate span generation
-  -> embedding generation
-  -> document-specific FAISS index
-  -> persisted document artifacts
-  -> ready status
+- Docker and Docker Compose.
+- Optional: a Groq API key or a running llama.cpp-compatible server if you want a real LLM provider.
+
+Start the full stack:
+
+```bash
+cp .env.example .env
+docker compose up --build
 ```
 
-Clause analysis:
+Open the app:
 
-```text
-Ready document
-  -> LangGraph analysis supervisor
-  -> clause extraction worker
-  -> structured validation
-  -> one correction attempt when invalid
-  -> validated extracted clauses
-  -> risk assessment worker
-  -> structured validation
-  -> result aggregation
-  -> persisted clause analysis
+- Frontend: http://localhost:3000
+- Backend health check: http://localhost:8000/health
+- Backend OpenAPI docs: http://localhost:8000/docs
+
+Uploaded documents and generated artifacts are stored in the named Docker volume `contract_intelligence_agent_backend-storage`.
+
+To stop the stack:
+
+```bash
+docker compose down
 ```
 
-Question answering:
+To remove persisted uploaded documents and indexes:
 
-```text
-User question
-  -> request validation
-  -> question embedding
-  -> document-specific retrieval
-  -> retrieval confidence check
-  -> QA worker
-  -> citation validation
-  -> streamed answer events
-  -> final structured response
+```bash
+docker compose down -v
 ```
 
-## Fixed Design Decisions
+## Local Development
 
-- Use one FAISS index per document. There is no shared global vector index.
-- The chunking module creates candidate spans; the clause extraction worker owns authoritative clause boundaries.
-- Risk assessment runs after validated clause extraction. It must not run concurrently with extraction for the same clause.
-- OCR is a fallback for failed or low-quality native PDF extraction, not a default path for every page.
-- All LLM providers must be accessed through a common internal interface. The initial default provider is Groq, and a llama.cpp-compatible provider is required before final evaluation.
-- Retrieval thresholds start as configurable constants and are tuned through the evaluation harness.
-- Evaluation claims must be produced by the repository's evaluation harness. Do not invent accuracy, citation, or refusal metrics.
-
-## Implemented Backend Capabilities
-
-Phases 1 through 5 are implemented for the backend:
-
-- FastAPI application skeleton with `/health`.
-- Typed environment configuration through Pydantic settings.
-- Atomic per-document storage rooted at `STORAGE_ROOT`.
-- PDF upload parsing with PyMuPDF and selective per-page OCR fallback hooks.
-- DOCX upload parsing with paragraph locators and table row text.
-- Text normalization that preserves raw extracted text separately.
-- Deterministic clause-aware candidate chunking.
-- Provider-independent LLM interface with Groq, llama.cpp-compatible, and deterministic local providers.
-- Structured clause extraction with one validation retry and heuristic fallback.
-- Deterministic embedding service.
-- One FAISS index per document with persisted metadata.
-- LangGraph analysis supervisor that runs clause extraction before risk assessment.
-- Versioned risk baseline with persisted risk explanations.
-- Clause analysis API that reloads persisted analysis results on repeat requests.
-- Document-specific question answering with retrieval thresholds.
-- Application-owned citation IDs and exact snippet validation.
-- Refusal behavior for unsupported questions.
-- Prompt-injection marker filtering before citation use.
-- SSE streaming for structured QA responses.
-- Typed API error responses with request IDs.
-- Atomic artifact writes with cleanup on interrupted writes.
-- Per-document locks for ingestion, extraction, and analysis.
-- Bounded Groq timeout retries and concurrency control.
-- Versioned index metadata with corrupt artifact detection.
-- Secret-safe configuration summaries for diagnostics.
-- Versioned executable evaluation dataset.
-- Reproducible evaluation runner with machine-readable JSON output.
-- Generated `EVAL.md` with actual metrics and error analysis.
-- Unit and integration tests for ingestion, chunking, extraction, indexing, and analysis.
-
-## Implemented Frontend Capabilities
-
-Phase 6 is implemented as a separate Next.js service:
-
-- Upload workflow for PDF and DOCX contracts.
-- Visible processing states for upload, extraction, analysis, and readiness.
-- PDF preview using React PDF with citation page highlighting.
-- DOCX extracted-text viewer with paragraph navigation and highlighting.
-- Clause summary and risk display.
-- Grounded chat panel using the backend SSE endpoint.
-- Citation chips that navigate to PDF pages or DOCX paragraphs.
-- Refusal messages rendered distinctly from supported answers.
-- Backend error display.
-- Dark mode toggle.
-- Keyboard-accessible controls and automated accessibility check for critical violations.
-- Frontend tests for upload, states, supported/refused answers, citation navigation, backend errors, and keyboard dark mode.
-
-Docker and final deployment polish are intentionally not implemented yet.
-
-## Repository Structure
-
-```text
-contract-intelligence-agent/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   ├── ingestion/
-│   │   ├── chunking/
-│   │   ├── retrieval/
-│   │   ├── agents/
-│   │   ├── llm/
-│   │   ├── schemas/
-│   │   ├── storage/
-│   │   ├── services/
-│   │   └── observability/
-│   ├── eval/
-│   ├── tests/
-│   ├── pyproject.toml
-│   └── requirements.txt
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── features/
-│   ├── lib/
-│   ├── tests/
-│   ├── types/
-│   ├── package.json
-│   └── tsconfig.json
-└── docs/
-    ├── implementation-plan.md
-    └── decisions/
-```
-
-Directories should be added when their phase is implemented, not as empty placeholders.
-
-## Backend Setup
+Backend:
 
 ```bash
 cd backend
-python -m pip install -e '.[dev]'
-uvicorn app.main:app --reload
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e ".[dev]"
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The API will start on `http://127.0.0.1:8000` by default.
+Frontend:
 
-Useful endpoints:
+```bash
+cd frontend
+npm install
+npm run dev -- --hostname 127.0.0.1 --port 3000
+```
+
+For local OCR outside Docker, install system packages:
+
+- `tesseract-ocr`
+- `tesseract-ocr-eng`
+- `poppler-utils`
+
+## Configuration
+
+Copy `.env.example` to `.env` before running Docker Compose.
+
+Important settings:
+
+| Variable | Purpose |
+| --- | --- |
+| `LLM_PROVIDER` | `fake`, `groq`, or `llamacpp`. |
+| `GROQ_API_KEY` / `LLM_API_KEY` | Secret used only when the active provider requires it. |
+| `LLAMACPP_BASE_URL` | OpenAI-compatible llama.cpp base URL. |
+| `STORAGE_ROOT` | Backend artifact storage location. Compose overrides this to `/app/storage`. |
+| `ALLOWED_ORIGINS` | JSON array of frontend origins allowed by CORS. |
+| `NEXT_PUBLIC_API_BASE_URL` | Browser-visible backend URL for the frontend. |
+| `OCR_ENABLED` | Enables selective OCR fallback. |
+
+Do not commit real secrets. `.env.example` contains safe placeholders only.
+
+## API Overview
+
+Core endpoints:
 
 - `GET /health`
-- `POST /documents` with a `file` upload field
+- `POST /documents`
 - `GET /documents/{document_id}`
 - `POST /documents/{document_id}/extract-clauses`
 - `GET /documents/{document_id}/clauses`
 - `POST /documents/{document_id}/questions`
 - `GET /documents/{document_id}/questions/stream?question=...`
 
-The default `.env.example` uses `LLM_PROVIDER=fake` so local tests and demos do not require external credentials. To use Groq, set `LLM_PROVIDER=groq` and provide `GROQ_API_KEY` or `LLM_API_KEY`.
+HTTP responses use typed Pydantic schemas. Streamed answers use Server-Sent Events for answer deltas, citations, refusals, final payloads, and errors.
 
-To use a llama.cpp-compatible server, set `LLM_PROVIDER=llamacpp` and `LLAMACPP_BASE_URL` or `LLM_BASE_URL` to an OpenAI-compatible `/v1` base URL.
+## Evaluation
 
-OCR support requires system OCR tools in addition to Python packages:
-
-- Tesseract OCR.
-- Poppler utilities for `pdf2image`.
-
-Without those system tools, native PDF extraction still works and OCR fallback records a warning instead of silently pretending OCR succeeded.
-
-## Frontend Setup
+Run the reproducible evaluation harness:
 
 ```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The frontend defaults to `http://127.0.0.1:8000` for the backend. Override it with:
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
-```
-
-## Validation
-
-Run the backend checks from the `backend/` directory:
-
-```bash
-python -m ruff check .
-python -m mypy app
-pytest
-```
-
-Run the evaluation harness from `backend/`:
-
-```bash
+cd backend
 python -m eval.runner
 ```
 
-This writes machine-readable results to `backend/eval/results/latest.json` and regenerates `EVAL.md`.
+The command writes:
 
-Current local validation:
+- Human-readable results: `EVAL.md`
+- Machine-readable results: `backend/eval/results/latest.json`
 
-- `python -m ruff check .`: passed.
-- `python -m mypy app`: passed for 61 source files.
-- `pytest`: 30 passed.
-- `python -m eval.runner`: completed on dataset `phase5-synthetic-v1`.
-- `cd frontend && npm run lint`: passed.
-- `cd frontend && npm run typecheck`: passed.
-- `cd frontend && npm test`: 5 passed.
-- `cd frontend && npm run build`: passed.
+Latest checked-in results from dataset `phase5-synthetic-v1`:
 
-Known frontend audit note:
+| Metric | Value |
+| --- | ---: |
+| Clause F1 | 0.8571 |
+| Risk accuracy | 1.0 |
+| Citation validity | 1.0 |
+| Refusal accuracy | 0.75 |
+| OCR evaluated pages | 0 |
 
-- `npm audit --omit=dev` currently reports a moderate advisory in Next.js' nested PostCSS dependency. The app is pinned to `next@15.5.20`, the patched version recommended by npm audit for the earlier critical Next advisories; the remaining audit recommendation suggests a breaking downgrade and was not applied.
+See [EVAL.md](EVAL.md) and [docs/evaluation.md](docs/evaluation.md) for details and known limitations.
 
-Latest evaluation results:
+## Validation
 
-- Clause F1: `0.8571`
-- Risk accuracy: `1.0`
-- Citation validity: `1.0`
-- Refusal accuracy: `0.75`
+Backend:
 
-## Data And Citation Rules
-
-- Document IDs are generated UUIDs. Storage paths must never be derived from user filenames.
-- PDF page numbers are 1-based. DOCX citations use paragraph and section locators, not fake pages.
-- Character offsets are 0-based half-open ranges.
-- Raw source text and normalized text remain distinguishable.
-- Every derived object must be traceable to the document, source span, processing stage, prompt version, model provider, and model where applicable.
-- Citation snippets must be exact contiguous substrings of normalized source text, allowing only documented whitespace normalization.
-- QA responses must refuse when supporting evidence is insufficient.
-
-## Configuration Expectations
-
-Runtime configuration will be loaded from typed environment settings. Required settings include application host/port, storage root, upload limits, CORS origins, active LLM provider and model, provider credentials, embedding model/device, retrieval thresholds, and OCR settings.
-
-Provider-specific credentials are required only for the active provider. Secrets must never be committed; `.env.example` should contain safe placeholders.
-
-## Development Status
-
-Current phase: Phase 6 complete.
-
-Future phases should leave the repository runnable and testable before moving on, and each completed phase should be committed locally and pushed to the configured remote. The next planned phase is Docker, documentation, and final polish.
-
-## Git Workflow
-
-Commit messages must use Conventional Commits:
-
-```text
-type(scope): subject
+```bash
+cd backend
+python -m ruff check .
+python -m mypy app
+pytest
+python -m eval.runner
 ```
 
-Allowed types are `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `build`, `ci`, and `revert`. Subjects should be imperative, lower than 72 characters, and must not end with a period.
+Frontend:
+
+```bash
+cd frontend
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+Docker:
+
+```bash
+cp .env.example .env
+docker compose up --build
+docker compose ps
+```
+
+## Architecture Notes
+
+- Backend and frontend are separate services.
+- Each document gets its own FAISS index.
+- Chunking creates candidate spans; clause extraction owns final clause boundaries.
+- Risk assessment runs after validated clause extraction.
+- OCR is a fallback, not the default path for every PDF.
+- LLM integrations go through a provider abstraction.
+- Stored artifacts are written atomically under a per-document storage layout.
+
+Read more in [docs/architecture.md](docs/architecture.md).
+
+## Security And Data Handling
+
+- Uploaded filenames are sanitized; storage paths are generated from UUIDs.
+- Upload size, file type, file signature, corrupt files, encrypted PDFs, and invalid DOCX files are validated.
+- Secrets are loaded from environment variables and redacted from settings summaries.
+- CORS origins are explicit.
+- The default `fake` provider avoids requiring credentials for local demos.
+- Docker uses a named local volume for persistent artifacts.
+
+See [docs/security-review.md](docs/security-review.md) for the final Phase 7 review.
+
+## Project Status
+
+Completed phases:
+
+- Phase 1: backend ingestion foundation.
+- Phase 2: embeddings, FAISS, analysis flow, risk, and clauses API.
+- Phase 3: grounded QA, citations, refusal handling, and SSE.
+- Phase 4: structured-output hardening and reliability.
+- Phase 5: evaluation harness.
+- Phase 6: frontend workspace.
+- Phase 7: Docker, documentation, and final polish.
+
+## License
+
+No license has been declared yet. Treat the code as all rights reserved until a license is added.

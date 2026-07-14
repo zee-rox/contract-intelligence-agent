@@ -232,10 +232,48 @@ Known limitations:
 
 ## Phase 7
 
-Status: not started.
+Status: completed.
 
 Scope:
 
 - Docker.
 - Documentation.
 - Final polish.
+
+Completed work:
+
+- Added backend Dockerfile with OCR system dependencies (`tesseract-ocr`, `tesseract-ocr-eng`, `poppler-utils`).
+- Added frontend Dockerfile with production Next.js startup.
+- Added Docker Compose with backend and frontend services, health checks, and a persistent `backend-storage` volume.
+- Added Docker build ignores for backend and frontend.
+- Updated `.env.example` with CORS and frontend API settings.
+- Rewrote the root README as a traditional GitHub project README.
+- Added architecture documentation.
+- Added evaluation documentation.
+- Added final security review documentation.
+- Included design screenshots as README project screenshots.
+
+Validation commands:
+
+```bash
+cd backend
+python -m ruff check .
+python -m mypy app
+pytest
+python -m eval.runner
+
+cd ../frontend
+npm run lint
+npm run typecheck
+npm test
+npm run build
+
+cd ..
+docker compose config
+docker compose build
+```
+
+Known limitations:
+
+- Docker Compose is intended for local portfolio/demo use and is not hardened for public internet deployment.
+- Frontend dependency audit advisories remain documented; forced automatic remediation would require breaking dependency changes.

@@ -19,7 +19,7 @@
     "ocr_enabled": true,
     "retrieval_score_threshold": 0.0,
     "retrieval_top_k": 5,
-    "storage_root": "/tmp/contract-eval-r795f6l4/storage"
+    "storage_root": "/tmp/contract-eval-peso2dze/storage"
   },
   "dataset_path": "backend/eval/datasets/phase5_dataset.json",
   "dataset_version": "phase5-synthetic-v1",
@@ -28,10 +28,10 @@
       "chunks": [
         {
           "char_count": 59,
-          "chunk_id": "chunk_0000_45cd32fce9771283",
+          "chunk_id": "chunk_0000_0838333d6ca5e703",
           "chunk_index": 0,
           "detected_heading": "Payment",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "normalized_text": "Payment\n\nInvoices are due within thirty days after receipt.",
           "source_locators": [
             {
@@ -57,10 +57,10 @@
         },
         {
           "char_count": 87,
-          "chunk_id": "chunk_0001_d7dc0e01325b99f0",
+          "chunk_id": "chunk_0001_06865483f65ee048",
           "chunk_index": 1,
           "detected_heading": "Termination",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "normalized_text": "Termination\n\nEither party may terminate this Agreement with thirty days written notice.",
           "source_locators": [
             {
@@ -86,10 +86,10 @@
         },
         {
           "char_count": 72,
-          "chunk_id": "chunk_0002_324d61c28def9467",
+          "chunk_id": "chunk_0002_d37ab954c6bccb8a",
           "chunk_index": 2,
           "detected_heading": "Liability",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "normalized_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
           "source_locators": [
             {
@@ -115,10 +115,10 @@
         },
         {
           "char_count": 93,
-          "chunk_id": "chunk_0003_a25b4accc77e0883",
+          "chunk_id": "chunk_0003_e1d8310f04ac59cf",
           "chunk_index": 3,
           "detected_heading": "Confidentiality",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "normalized_text": "Confidentiality\n\nEach party shall keep confidential information confidential during the term.",
           "source_locators": [
             {
@@ -175,10 +175,10 @@
           "clause_text": "Termination\n\nEither party may terminate this Agreement with thirty days written notice.",
           "clause_type": "termination",
           "confidence": "medium",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0001_d7dc0e01325b99f0"
+            "chunk_0001_06865483f65ee048"
           ],
           "source_locators": [
             {
@@ -205,10 +205,10 @@
           "clause_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
           "clause_type": "confidentiality",
           "confidence": "medium",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0002_324d61c28def9467"
+            "chunk_0002_d37ab954c6bccb8a"
           ],
           "source_locators": [
             {
@@ -235,10 +235,10 @@
           "clause_text": "Payment\n\nInvoices are due within thirty days after receipt.",
           "clause_type": "payment_terms",
           "confidence": "medium",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0000_45cd32fce9771283"
+            "chunk_0000_0838333d6ca5e703"
           ],
           "source_locators": [
             {
@@ -265,10 +265,10 @@
           "clause_text": "Liability\n\nSupplier liability is unlimited for confidentiality breaches.",
           "clause_type": "liability",
           "confidence": "medium",
-          "document_id": "91d52b72-f898-43ed-8360-121b916a672d",
+          "document_id": "aaaeb770-919f-457d-8481-ee97573947cc",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0002_324d61c28def9467"
+            "chunk_0002_d37ab954c6bccb8a"
           ],
           "source_locators": [
             {
@@ -352,7 +352,7 @@
             "answer": "Based on the cited contract text, the payment provision states: Invoices are due within thirty days after receipt. [cit_0000]",
             "citations": [
               {
-                "chunk_id": "chunk_0000_45cd32fce9771283",
+                "chunk_id": "chunk_0000_0838333d6ca5e703",
                 "citation_id": "cit_0000",
                 "quoted_snippet": "Invoices are due within thirty days after receipt.",
                 "source_locator": {
@@ -384,17 +384,17 @@
           }
         }
       ],
-      "runtime_seconds": 0.0743,
-      "source_sha256": "583bd22576c9207741e2a18049e301d9ed5876633133d947789d38b974088d24"
+      "runtime_seconds": 0.4021,
+      "source_sha256": "4ba63788aa264d42ff85f4570f3431ae172824832fea8e82dedce2465c0fdb40"
     },
     {
       "chunks": [
         {
           "char_count": 66,
-          "chunk_id": "chunk_0000_c60911d0064778bd",
+          "chunk_id": "chunk_0000_f1ccd3a0fe62722b",
           "chunk_index": 0,
           "detected_heading": "Governing Law",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "normalized_text": "Governing Law\n\nThis Agreement is governed by the laws of New York.",
           "source_locators": [
             {
@@ -420,10 +420,10 @@
         },
         {
           "char_count": 93,
-          "chunk_id": "chunk_0001_0afede65c2585e32",
+          "chunk_id": "chunk_0001_4d66311df7a32afd",
           "chunk_index": 1,
           "detected_heading": "Force Majeure",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "normalized_text": "Force Majeure\n\nNeither party is liable for delays caused by events beyond reasonable control.",
           "source_locators": [
             {
@@ -449,10 +449,10 @@
         },
         {
           "char_count": 98,
-          "chunk_id": "chunk_0002_40921cae3f603639",
+          "chunk_id": "chunk_0002_0a383e068fe3e6c4",
           "chunk_index": 2,
           "detected_heading": "Indemnification",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "normalized_text": "Indemnification\n\nCustomer shall indemnify Supplier against third party claims arising from misuse.",
           "source_locators": [
             {
@@ -504,10 +504,10 @@
           "clause_text": "Governing Law\n\nThis Agreement is governed by the laws of New York.",
           "clause_type": "governing_law",
           "confidence": "medium",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0000_c60911d0064778bd"
+            "chunk_0000_f1ccd3a0fe62722b"
           ],
           "source_locators": [
             {
@@ -534,10 +534,10 @@
           "clause_text": "Indemnification\n\nCustomer shall indemnify Supplier against third party claims arising from misuse.",
           "clause_type": "indemnification",
           "confidence": "medium",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0002_40921cae3f603639"
+            "chunk_0002_0a383e068fe3e6c4"
           ],
           "source_locators": [
             {
@@ -564,10 +564,10 @@
           "clause_text": "Force Majeure\n\nNeither party is liable for delays caused by events beyond reasonable control.",
           "clause_type": "force_majeure",
           "confidence": "medium",
-          "document_id": "7c318e6a-035f-49ee-a30a-2c73c1918113",
+          "document_id": "c20d7ea5-4d92-4f13-8777-602d969b3f1e",
           "extraction_notes": "detected by deterministic fake provider",
           "source_chunk_ids": [
-            "chunk_0001_0afede65c2585e32"
+            "chunk_0001_4d66311df7a32afd"
           ],
           "source_locators": [
             {
@@ -639,7 +639,7 @@
             "answer": "Based on the cited contract text, the contract states: Governing Law. [cit_0000]",
             "citations": [
               {
-                "chunk_id": "chunk_0000_c60911d0064778bd",
+                "chunk_id": "chunk_0000_f1ccd3a0fe62722b",
                 "citation_id": "cit_0000",
                 "quoted_snippet": "Governing Law",
                 "source_locator": {
@@ -666,7 +666,7 @@
             "answer": "Based on the cited contract text, the termination provision states: Customer shall indemnify Supplier against third party claims arising from misuse. [cit_0000], [cit_0001]",
             "citations": [
               {
-                "chunk_id": "chunk_0002_40921cae3f603639",
+                "chunk_id": "chunk_0002_0a383e068fe3e6c4",
                 "citation_id": "cit_0000",
                 "quoted_snippet": "Customer shall indemnify Supplier against third party claims arising from misuse.",
                 "source_locator": {
@@ -679,7 +679,7 @@
                 }
               },
               {
-                "chunk_id": "chunk_0001_0afede65c2585e32",
+                "chunk_id": "chunk_0001_4d66311df7a32afd",
                 "citation_id": "cit_0001",
                 "quoted_snippet": "Neither party is liable for delays caused by events beyond reasonable control.",
                 "source_locator": {
@@ -698,8 +698,8 @@
           }
         }
       ],
-      "runtime_seconds": 0.0696,
-      "source_sha256": "865a5d8f283a067f9010107498e1a773ea90ffaa1bb8641728d0e78ad45165c1"
+      "runtime_seconds": 0.3148,
+      "source_sha256": "b22c4219537e389e80a2538285a17f7596b423203474014989fcc933dca1f5fe"
     }
   ],
   "error_analysis": {
@@ -747,7 +747,7 @@
     },
     "performance": {
       "documents": 2,
-      "total_seconds": 0.1461
+      "total_seconds": 0.7203
     },
     "refusal": {
       "accuracy": 0.75,
@@ -771,5 +771,5 @@
     }
   ],
   "result_path": "backend/eval/results/latest.json",
-  "run_id": "20260710T163941Z"
+  "run_id": "20260714T104933Z"
 }
