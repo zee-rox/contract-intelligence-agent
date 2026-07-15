@@ -55,7 +55,8 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
     provider = build_llm_provider(settings)
     prompt = (
         "Extract contractual clauses as JSON with key clauses. "
-        "Each clause needs clause_type, clause_heading, clause_text, source_chunk_ids, confidence, extraction_notes."
+        "Each clause needs clause_type, clause_heading, clause_text, source_chunk_ids, confidence, extraction_notes, "
+        "and entities as a JSON object containing any dates, notice periods, amounts, parties, or obligations."
     )
     context = "\n\n".join(f"[{chunk.chunk_id}]\n{chunk.normalized_text}" for chunk in chunks)
     fallback_used = False

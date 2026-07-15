@@ -44,6 +44,11 @@ def parse_pdf(path: Path, document_id: UUID, settings: Settings) -> tuple[list[E
 
         normalized = normalize_text(raw_text)
         rect = page.rect
+        bounding_boxes = [
+            BoundingBox(x0=float(block[0]), y0=float(block[1]), x1=float(block[2]), y1=float(block[3]))
+            for block in page.get_text("blocks")
+            if len(block) >= 5 and str(block[4]).strip()
+        ]
         pages.append(
             ExtractedPage(
                 page_number=page_number,
@@ -59,7 +64,7 @@ def parse_pdf(path: Path, document_id: UUID, settings: Settings) -> tuple[list[E
                     page_number=page_number,
                     char_offset_start=0,
                     char_offset_end=len(normalized),
-                    bounding_boxes=[BoundingBox(x0=0, y0=0, x1=float(rect.width), y1=float(rect.height))],
+                    bounding_boxes=bounding_boxes or [BoundingBox(x0=0, y0=0, x1=float(rect.width), y1=float(rect.height))],
                 ),
             )
         )

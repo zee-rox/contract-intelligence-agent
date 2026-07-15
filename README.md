@@ -110,10 +110,13 @@ Important settings:
 | `LLAMACPP_BASE_URL` | OpenAI-compatible llama.cpp base URL. |
 | `STORAGE_ROOT` | Backend artifact storage location. Compose overrides this to `/app/storage`. |
 | `ALLOWED_ORIGINS` | JSON array of frontend origins allowed by CORS. |
+| `RATE_LIMIT_PER_MINUTE` | In-memory per-client request limit; set `0` to disable locally. |
 | `NEXT_PUBLIC_API_BASE_URL` | Browser-visible backend URL for the frontend. |
 | `OCR_ENABLED` | Enables selective OCR fallback. |
 
 Do not commit real secrets. `.env.example` contains safe placeholders only.
+
+The frontend supports clause search and risk filtering, real PDF thumbnails, fit-width/fit-height/full-screen viewing, clause-level citation highlighting, extraction-quality warnings, and retry controls for interrupted chat streams. The backend returns source-validated citations, PDF text-block geometry, structured clause entities, and streamed answer deltas. Rate limiting is intentionally in-memory and resets when the backend restarts; persistent users, chat history, and document ownership are outside the current filesystem-only deployment.
 
 Gemini example:
 

@@ -55,7 +55,7 @@ def create_citations(question: str, chunks: list[CandidateChunk], results: list[
     for result in results:
         chunk = by_id[result.chunk_id]
         snippet = choose_snippet(question, chunk.normalized_text)
-        if not snippet or snippet not in chunk.normalized_text:
+        if not snippet or not _snippet_is_grounded(snippet, chunk.normalized_text):
             continue
         citations.append(
             Citation(
@@ -66,6 +66,12 @@ def create_citations(question: str, chunks: list[CandidateChunk], results: list[
             )
         )
     return citations
+
+
+def _snippet_is_grounded(snippet: str, source: str) -> bool:
+    normalized_snippet = re.sub(r"\s+", " ", snippet).strip().lower()
+    normalized_source = re.sub(r"\s+", " ", source).strip().lower()
+    return bool(normalized_snippet) and normalized_snippet in normalized_source
 
 
 def choose_snippet(question: str, text: str) -> str:

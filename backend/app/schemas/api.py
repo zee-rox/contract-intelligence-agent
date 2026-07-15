@@ -7,3 +7,4 @@ from pydantic import BaseModel
 class DocumentIngestionResponse(BaseModel):
     document: DocumentRecord
     chunks: list[CandidateChunk]
+    warnings: list[str] = []

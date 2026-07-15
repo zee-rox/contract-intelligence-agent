@@ -36,7 +36,7 @@ class DocumentService:
                 index.build_and_persist(record.document_id, chunks)
                 ready = indexing_record.model_copy(update={"status": "ready", "updated_at": datetime.now(timezone.utc)})
                 self.repository.save_manifest(ready)
-                return DocumentIngestionResponse(document=ready, chunks=chunks)
+                return DocumentIngestionResponse(document=ready, chunks=chunks, warnings=parsed.warnings)
             except Exception:
                 failed = record.model_copy(
                     update={

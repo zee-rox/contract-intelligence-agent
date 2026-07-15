@@ -36,6 +36,13 @@ class QAService:
         if not results:
             return self._refuse("insufficient_evidence")
         by_id = {chunk.chunk_id: chunk for chunk in chunks}
+        results.sort(
+            key=lambda result: (
+                lexical_overlap(question, by_id[result.chunk_id].normalized_text),
+                result.score,
+            ),
+            reverse=True,
+        )
         supported_results = [
             result
             for result in results
@@ -66,7 +73,9 @@ class QAService:
         if response.refused:
             yield _sse("refusal", {"reason": response.refusal_reason, "answer": response.answer})
         else:
-            yield _sse("answer_delta", {"text": response.answer})
+            words = response.answer.split(" ")
+            for index, word in enumerate(words):
+                yield _sse("answer_delta", {"text": f"{word}{' ' if index < len(words) - 1 else ''}"})
             for citation in response.citations:
                 yield _sse("citation", citation.model_dump(mode="json"))
         yield _sse("final", response.model_dump(mode="json"))

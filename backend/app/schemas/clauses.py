@@ -28,6 +28,7 @@ class ExtractedClause(BaseModel):
     source_locators: list[SourceLocator]
     confidence: Confidence
     extraction_notes: str | None = None
+    entities: dict[str, list[str]] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def require_traceability(self) -> "ExtractedClause":

@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     ocr_language: str = "eng"
     ocr_dpi: int = Field(default=200, ge=72, le=400)
     ocr_max_concurrency: int = Field(default=2, ge=1, le=8)
+    rate_limit_per_minute: int = Field(default=120, ge=0, le=10000)
 
     parser_version: str = "phase1-parser-v1"
     chunker_version: str = "phase1-chunker-v1"
@@ -89,6 +90,7 @@ class Settings(BaseSettings):
             "embedding_dimension": self.embedding_dimension,
             "retrieval_top_k": self.retrieval_top_k,
             "retrieval_score_threshold": self.retrieval_score_threshold,
+            "rate_limit_per_minute": self.rate_limit_per_minute,
         }
 
 
