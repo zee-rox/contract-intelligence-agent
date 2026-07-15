@@ -1,4 +1,5 @@
 import re
+import json
 
 from app.schemas.chunks import CandidateChunk
 from app.schemas.qa import Citation, ModelQAResponse, QAResponse
@@ -86,6 +87,13 @@ def build_grounded_answer(question: str, citations: list[Citation]) -> str:
         return "The document does not provide enough information to answer that question."
     citation_refs = ", ".join(f"[{citation.citation_id}]" for citation in citations)
     return f"Based on the cited contract text, {summarize_evidence(question, citations)} {citation_refs}"
+
+
+def parse_model_qa_response(payload: str) -> ModelQAResponse:
+    cleaned = payload.strip()
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", cleaned, flags=re.IGNORECASE | re.DOTALL).strip()
+    return ModelQAResponse.model_validate(json.loads(cleaned))
 
 
 def summarize_evidence(question: str, citations: list[Citation]) -> str:

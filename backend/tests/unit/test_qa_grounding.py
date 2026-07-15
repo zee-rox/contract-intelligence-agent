@@ -1,6 +1,6 @@
 from uuid import uuid4
 
-from app.agents.qa import create_citations, validate_or_repair_response
+from app.agents.qa import create_citations, parse_model_qa_response, validate_or_repair_response
 from app.schemas.chunks import CandidateChunk
 from app.schemas.qa import ModelQAResponse
 from app.schemas.retrieval import RetrievalResult
@@ -54,3 +54,13 @@ def test_unknown_model_citation_ids_are_repaired() -> None:
 
     assert repaired.refused is False
     assert repaired.citations[0].citation_id == "cit_0000"
+
+
+def test_model_qa_response_accepts_json_contract() -> None:
+    response = parse_model_qa_response(
+        '```json\n{"answer":"The term renews annually unless notice is given.","citation_ids":["cit_0000"],"confidence":"high"}\n```'
+    )
+
+    assert response.answer.startswith("The term renews")
+    assert response.citation_ids == ["cit_0000"]
+    assert response.confidence == "high"

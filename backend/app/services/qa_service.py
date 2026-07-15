@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+import logging
 from uuid import UUID
 import json
 from typing import Any
@@ -8,13 +9,18 @@ from app.agents.qa import (
     create_citations,
     has_prompt_injection_marker,
     lexical_overlap,
+    parse_model_qa_response,
     validate_or_repair_response,
 )
 from app.config import Settings, get_settings
+from app.llm.factory import build_llm_provider
+from app.llm.interface import LLMMessage
 from app.retrieval.embeddings import HashEmbeddingService
 from app.retrieval.index import DocumentFaissIndex
-from app.schemas.qa import ModelQAResponse, QAResponse
+from app.schemas.qa import Citation, ModelQAResponse, QAResponse
 from app.storage.repository import StorageRepository
+
+logger = logging.getLogger(__name__)
 
 
 class QAService:
@@ -56,12 +62,41 @@ class QAService:
         if not citations:
             return self._refuse("retrieval_failed")
         fallback_answer = build_grounded_answer(question, citations)
-        draft = ModelQAResponse(
-            answer=fallback_answer,
-            citation_ids=[citation.citation_id for citation in citations],
-            confidence="medium",
-        )
+        draft = self._generate_answer(question, citations, fallback_answer)
         return validate_or_repair_response(draft, citations, fallback_answer)
+
+    def _generate_answer(self, question: str, citations: list[Citation], fallback_answer: str) -> ModelQAResponse:
+        provider = build_llm_provider(self.settings)
+        evidence = "\n\n".join(
+            f"[{citation.citation_id}] {citation.quoted_snippet}" for citation in citations
+        )
+        prompt = (
+            "You are a careful contract analyst. Answer the user's question using only the provided contract excerpts. "
+            "Write a direct, useful answer with context: explain the rule, conditions, exceptions, and practical effect "
+            "when the excerpts support them. Do not merely say that a clause mentions something. Do not invent facts. "
+            "Return only valid JSON with exactly these keys: answer (string), citation_ids (array of supplied IDs), "
+            "confidence (high, medium, or low). Do not put citation markers in the answer text.\n\n"
+            f"User question: {question}\n\nContract excerpts:\n{evidence}"
+        )
+        try:
+            response = provider.generate(
+                [
+                    LLMMessage(role="system", content="Answer grounded contract questions as concise JSON."),
+                    LLMMessage(role="user", content=prompt),
+                ],
+                temperature=0.1,
+            )
+            draft = parse_model_qa_response(response.content)
+            if not draft.answer.strip():
+                raise ValueError("provider returned an empty answer")
+            return draft
+        except Exception as exc:
+            logger.warning("qa provider answer failed provider=%s error=%s; using grounded fallback", provider.provider_name, exc)
+            return ModelQAResponse(
+                answer=fallback_answer,
+                citation_ids=[citation.citation_id for citation in citations],
+                confidence="medium",
+            )
 
     def stream_answer(self, document_id: UUID, question: str) -> Iterator[str]:
         try:
@@ -96,3 +131,4 @@ def _sse(event: str, data: dict[str, Any]) -> str:
 
 def get_qa_service() -> QAService:
     return QAService(get_settings())
+    parse_model_qa_response,

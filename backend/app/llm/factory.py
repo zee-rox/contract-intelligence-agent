@@ -14,6 +14,22 @@ class FakeProvider:
 
     def generate(self, messages: list[LLMMessage], *, temperature: float = 0.0) -> LLMResponse:
         text = "\n".join(message.content for message in messages)
+        if "contract analyst" in text.lower() and "citation_ids" in text:
+            question_match = re.search(r"User question:\s*(.+?)\n\nContract excerpts:", text, flags=re.DOTALL)
+            question = question_match.group(1).strip().lower() if question_match else ""
+            excerpts = re.findall(r"\[(cit_[^\]]+)\]\s+(.+?)(?=\n\n\[cit_|\Z)", text, flags=re.DOTALL)
+            first_id, first_excerpt = excerpts[0] if excerpts else ("", "")
+            if "terminat" in question:
+                answer = f"The termination provision states: {first_excerpt.strip()}"
+            elif "payment" in question or "invoice" in question:
+                answer = f"The payment provision states: {first_excerpt.strip()}"
+            else:
+                answer = f"The contract states: {first_excerpt.strip()}"
+            return LLMResponse(
+                content=json.dumps({"answer": answer, "citation_ids": [first_id] if first_id else [], "confidence": "medium"}),
+                provider=self.provider_name,
+                model=self.model,
+            )
         chunk_blocks = re.findall(r"\[(chunk_[^\]]+)\]\n(.*?)(?=\n\n\[chunk_|\Z)", text, flags=re.DOTALL)
         clauses = []
         for heading, clause_type in [
