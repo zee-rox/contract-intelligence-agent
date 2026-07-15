@@ -30,6 +30,7 @@ export function ContractWorkspace() {
   const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ChatThreadMessage[]>([]);
+  const [lastQuestion, setLastQuestion] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [activePage, setActivePage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
@@ -75,6 +76,7 @@ export function ContractWorkspace() {
     setActiveTab("document");
     setError(null);
     setMessages([]);
+    setLastQuestion("");
     setAnalysis(null);
     setIngestion(null);
     setActiveCitation(null);
@@ -107,11 +109,15 @@ export function ContractWorkspace() {
 
   function submitQuestion(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!ingestion || !question.trim() || streaming || state !== "ready") {
+    startQuestion(question.trim());
+  }
+
+  function startQuestion(trimmed: string) {
+    if (!ingestion || !trimmed || streaming || state !== "ready") {
       return;
     }
 
-    const trimmed = question.trim();
+    setLastQuestion(trimmed);
     const userMessage: ChatThreadMessage = {
       id: crypto.randomUUID(),
       role: "user",
@@ -231,13 +237,16 @@ export function ContractWorkspace() {
           <AnalysisPane
             state={state}
             error={error}
+            warnings={ingestion?.warnings ?? []}
             analysis={analysis}
             activeRiskByClause={activeRiskByClause}
+            activeCitationId={activeCitation?.citation_id ?? null}
             messages={messages}
             question={question}
             streaming={streaming}
             onQuestionChange={setQuestion}
             onQuestionSubmit={submitQuestion}
+            onRetry={() => startQuestion(lastQuestion)}
             onCitation={handleCitation}
           />
         </aside>

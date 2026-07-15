@@ -47,6 +47,7 @@ export type DocumentRecord = {
 export type DocumentIngestionResponse = {
   document: DocumentRecord;
   chunks: CandidateChunk[];
+  warnings?: string[];
 };
 
 export type ExtractedClause = {

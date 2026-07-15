@@ -1,6 +1,6 @@
 "use client";
 
-import { Maximize2, Minus, Plus } from "lucide-react";
+import { Expand, Maximize2, Minus, Plus, Scan } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { Citation } from "@/types/api";
@@ -24,6 +24,8 @@ export function PdfPreview({
   const [pageCount, setPageCount] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [fitWidth, setFitWidth] = useState(584);
+  const [fitHeight, setFitHeight] = useState(700);
+  const [fitMode, setFitMode] = useState<"width" | "height">("width");
   const [renderedSize, setRenderedSize] = useState({ width: 584, height: 824 });
   const viewerRef = useRef<HTMLDivElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -38,7 +40,10 @@ export function PdfPreview({
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
-    const resize = () => setFitWidth(Math.max(280, viewer.clientWidth - 32));
+    const resize = () => {
+      setFitWidth(Math.max(280, viewer.clientWidth - 32));
+      setFitHeight(Math.max(360, viewer.clientHeight - 128) * (612 / 792));
+    };
     resize();
     const observer = new ResizeObserver(resize);
     observer.observe(viewer);
@@ -60,7 +65,7 @@ export function PdfPreview({
     onPageCountChange(count);
   }
 
-  const pageWidth = Math.round(fitWidth * zoom);
+  const pageWidth = Math.round((fitMode === "width" ? fitWidth : fitHeight) * zoom);
 
   return (
     <div ref={viewerRef} className="cia-pdf-viewer" aria-label="PDF document viewer">
@@ -93,14 +98,56 @@ export function PdfPreview({
         <button type="button" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(1.3, value + 0.1))}>
           <Plus size={16} aria-hidden="true" />
         </button>
-        <button type="button" aria-label="Fit width" title="Fit to pane width" onClick={() => setZoom(1)}>
+        <button type="button" aria-label="Fit width" title="Fit to pane width" onClick={() => { setFitMode("width"); setZoom(1); }}>
           <Maximize2 size={15} aria-hidden="true" />
+        </button>
+        <button type="button" aria-label="Fit height" title="Fit to pane height" onClick={() => { setFitMode("height"); setZoom(1); }}>
+          <Scan size={15} aria-hidden="true" />
+        </button>
+        <button type="button" aria-label="Open full screen" title="Open full screen" onClick={() => viewerRef.current?.requestFullscreen?.()}>
+          <Expand size={15} aria-hidden="true" />
         </button>
       </div>
       <p className="sr-only" aria-live="polite">
         Page {pageNumber} of {pageCount}
       </p>
     </div>
+  );
+}
+
+export function PdfThumbnailRail({
+  fileUrl,
+  activePage,
+  pageCount,
+  onPageChange
+}: {
+  fileUrl: string;
+  activePage: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  const pages = visiblePages(activePage, pageCount);
+  return (
+    <nav className="cia-thumbnail-rail" aria-label="Document pages">
+      <Document file={fileUrl} loading={null}>
+        {pages.map((page) => (
+          <button
+            key={page}
+            type="button"
+            className={page === activePage ? "active" : undefined}
+            onClick={() => onPageChange(page)}
+            aria-label={`Go to page ${page}`}
+            aria-current={page === activePage ? "page" : undefined}
+            title={`Page ${page}`}
+          >
+            <span className="cia-thumbnail-page">
+              <Page pageNumber={page} width={32} renderTextLayer={false} renderAnnotationLayer={false} />
+            </span>
+            <strong>{page}</strong>
+          </button>
+        ))}
+      </Document>
+    </nav>
   );
 }
 
@@ -174,4 +221,10 @@ function PdfCitationHighlight({
       ))}
     </>
   );
+}
+
+function visiblePages(activePage: number, pageCount: number) {
+  const total = Math.max(pageCount, activePage, 1);
+  const start = Math.min(Math.max(activePage - 1, 1), Math.max(total - 3, 1));
+  return Array.from({ length: Math.min(4, total) }, (_, index) => start + index);
 }

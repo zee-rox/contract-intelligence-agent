@@ -246,6 +246,24 @@ button {
   padding: 0;
 }
 
+.cia-thumbnail-rail > .react-pdf__Document {
+  display: contents;
+}
+
+.cia-thumbnail-page {
+  display: block;
+  width: 32px;
+  height: 90px;
+  overflow: hidden;
+  border: 1px solid var(--cia-line);
+  border-radius: 2px;
+  background: #f0f0ed;
+}
+
+.cia-thumbnail-page .react-pdf__Page {
+  min-height: 42px;
+}
+
 .cia-thumbnail-rail span {
   display: block;
   width: 32px;
@@ -256,6 +274,11 @@ button {
 }
 
 .cia-thumbnail-rail button.active span {
+  border-color: var(--cia-brand);
+  background: white;
+}
+
+.cia-thumbnail-rail button.active .cia-thumbnail-page {
   border-color: var(--cia-brand);
   background: white;
 }
@@ -479,6 +502,60 @@ button {
   display: grid;
 }
 
+.cia-clause-tools {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.cia-clause-search,
+.cia-risk-filter {
+  display: flex;
+  min-width: 0;
+  height: 34px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--cia-line);
+  border-radius: 8px;
+  background: var(--cia-bg);
+  color: var(--cia-text-soft);
+  padding: 0 10px;
+}
+
+.cia-clause-search {
+  flex: 1;
+}
+
+.cia-clause-search input,
+.cia-risk-filter select {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cia-text);
+  font-size: 12px;
+}
+
+.cia-risk-filter select {
+  cursor: pointer;
+}
+
+.cia-no-results {
+  padding: 16px 0;
+}
+
+.cia-warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-bottom: 1px solid #eed9a5;
+  background: #fff8e6;
+  color: #795817;
+  font-size: 12px;
+  line-height: 1.4;
+  padding: 10px 20px;
+}
+
 .cia-clause-row {
   display: grid;
   min-height: 62px;
@@ -621,6 +698,15 @@ button {
   margin: 0;
 }
 
+.cia-answer-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.cia-answer-copy li {
+  margin-left: 18px;
+}
+
 .cia-assistant-label {
   color: var(--cia-brand);
   font-size: 10px;
@@ -679,6 +765,21 @@ button {
 
 .cia-citation-chip:hover {
   background: color-mix(in srgb, var(--cia-brand-soft), var(--cia-brand) 8%);
+}
+
+.cia-retry-button {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--cia-line);
+  border-radius: 8px;
+  background: white;
+  color: var(--cia-brand);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 10px;
 }
 
 .cia-boundary-message {

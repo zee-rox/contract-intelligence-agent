@@ -6,7 +6,9 @@ import {
   ArrowUp,
   ChevronUp,
   FileUp,
+  ListFilter,
   MoreHorizontal,
+  RotateCcw,
   Search,
   Upload
 } from "lucide-react";
@@ -26,6 +28,9 @@ import type {
 const PdfPreview = dynamic(() => import("./pdf-preview").then((module) => module.PdfPreview), {
   ssr: false,
   loading: () => <SkeletonLoader variant="document" />
+});
+const PdfThumbnailRail = dynamic(() => import("./pdf-preview").then((module) => module.PdfThumbnailRail), {
+  ssr: false
 });
 
 export type UploadState = "idle" | "uploading" | "analyzing" | "ready" | "error";
@@ -177,7 +182,7 @@ export function DocumentViewer({
   if (isPdf(file)) {
     return (
       <div className="cia-document-pane">
-        <PageThumbnailRail activePage={activePage} pageCount={pageCount} onPageChange={onPageChange} />
+        <PdfThumbnailRail fileUrl={fileUrl} activePage={activePage} pageCount={pageCount} onPageChange={onPageChange} />
         <PdfPreview
           fileUrl={fileUrl}
           activeCitation={activeCitation}
@@ -245,13 +250,29 @@ function StatusPill({ status }: { status: UploadState }) {
 export function ClauseSummaryTable({
   analysis,
   activeRiskByClause,
+  activeCitationId,
   onCitation
 }: {
   analysis: ClauseAnalysisResult | null;
   activeRiskByClause: Map<string, RiskAssessment>;
+  activeCitationId: string | null;
   onCitation: (citation: Citation) => void;
 }) {
+  const [query, setQuery] = React.useState("");
+  const [riskFilter, setRiskFilter] = React.useState<"all" | RiskAssessment["risk_level"]>("all");
+  const [sortHighFirst, setSortHighFirst] = React.useState(true);
   const clauses = analysis?.clauses ?? [];
+  const visibleClauses = [...clauses]
+    .filter((clause) => {
+      const risk = activeRiskByClause.get(clause.clause_id);
+      const haystack = `${clause.clause_heading ?? ""} ${clause.clause_text}`.toLowerCase();
+      return haystack.includes(query.toLowerCase()) && (riskFilter === "all" || risk?.risk_level === riskFilter);
+    })
+    .sort((left, right) => {
+      if (!sortHighFirst) return 0;
+      const rank = { high: 0, medium: 1, low: 2 };
+      return (rank[activeRiskByClause.get(left.clause_id)?.risk_level ?? "low"] ?? 2) - (rank[activeRiskByClause.get(right.clause_id)?.risk_level ?? "low"] ?? 2);
+    });
   return (
     <section className="cia-clause-section" aria-labelledby="clause-summary-heading">
       <div className="cia-section-heading">
@@ -260,23 +281,42 @@ export function ClauseSummaryTable({
           {analysis ? <span className="cia-count-pill">{clauses.length} clauses</span> : null}
         </div>
         {analysis ? (
-          <button type="button" className="cia-sort-button" aria-label="Sort clauses by risk" title="Risk sorted high first">
-            Risk: High first <ChevronUp size={16} aria-hidden="true" />
+          <button type="button" className="cia-sort-button" aria-label="Toggle clause risk sorting" onClick={() => setSortHighFirst((value) => !value)} title="Toggle risk sorting">
+            Risk: {sortHighFirst ? "High first" : "Original order"} <ChevronUp size={16} aria-hidden="true" />
           </button>
         ) : null}
       </div>
+      {analysis ? (
+        <div className="cia-clause-tools">
+          <label className="cia-clause-search">
+            <Search size={15} aria-hidden="true" />
+            <span className="sr-only">Search clauses</span>
+            <input value={query} onChange={(event) => setQuery(event.currentTarget.value)} placeholder="Search clauses" />
+          </label>
+          <label className="cia-risk-filter">
+            <ListFilter size={15} aria-hidden="true" />
+            <span className="sr-only">Filter clauses by risk</span>
+            <select value={riskFilter} onChange={(event) => setRiskFilter(event.currentTarget.value as typeof riskFilter)}>
+              <option value="all">All risks</option>
+              <option value="high">High risk</option>
+              <option value="medium">Medium risk</option>
+              <option value="low">Low risk</option>
+            </select>
+          </label>
+        </div>
+      ) : null}
       {!analysis ? (
         <p className="cia-muted-copy">Analysis appears after upload.</p>
       ) : (
         <div className="cia-clause-table" aria-label="Clause summary table">
-          {clauses.map((clause, index) => {
+          {visibleClauses.map((clause) => {
             const risk = activeRiskByClause.get(clause.clause_id);
             const citation = citationFromClause(clause);
             return (
               <button
                 key={clause.clause_id}
                 type="button"
-                className={cx("cia-clause-row", index === 0 && "active")}
+                className={cx("cia-clause-row", activeCitationId === clause.clause_id && "active")}
                 onClick={() => citation && onCitation(citation)}
                 disabled={!citation}
                 title={citation ? `Show source for ${readableClauseType(clause.clause_type)}` : undefined}
@@ -289,6 +329,7 @@ export function ClauseSummaryTable({
               </button>
             );
           })}
+          {analysis && visibleClauses.length === 0 ? <p className="cia-muted-copy cia-no-results">No clauses match this filter.</p> : null}
         </div>
       )}
     </section>
@@ -302,9 +343,12 @@ export function RiskBadge({ level }: { level: RiskAssessment["risk_level"] }) {
 export function AnalysisPane({
   state,
   error,
+  warnings,
   analysis,
   activeRiskByClause,
+  activeCitationId,
   messages,
+  onRetry,
   question,
   streaming,
   onQuestionChange,
@@ -313,9 +357,12 @@ export function AnalysisPane({
 }: {
   state: UploadState;
   error: string | null;
+  warnings: string[];
   analysis: ClauseAnalysisResult | null;
   activeRiskByClause: Map<string, RiskAssessment>;
+  activeCitationId: string | null;
   messages: ChatThreadMessage[];
+  onRetry: () => void;
   question: string;
   streaming: boolean;
   onQuestionChange: (value: string) => void;
@@ -353,12 +400,13 @@ export function AnalysisPane({
 
   return (
     <div className="cia-analysis-pane">
-      <ClauseSummaryTable analysis={analysis} activeRiskByClause={activeRiskByClause} onCitation={onCitation} />
+      {warnings.length ? <div className="cia-warning-banner" role="status"><AlertCircle size={16} aria-hidden="true" /><span>{warnings[0]}</span></div> : null}
+      <ClauseSummaryTable analysis={analysis} activeRiskByClause={activeRiskByClause} activeCitationId={activeCitationId} onCitation={onCitation} />
       <div className="cia-collapse-strip">
         <span>Clause summary</span>
         <ChevronUp size={16} aria-hidden="true" />
       </div>
-      <ChatThread messages={messages} onCitation={onCitation} />
+      <ChatThread messages={messages} onCitation={onCitation} onRetry={onRetry} />
       <ChatInput
         disabled={state !== "ready"}
         value={question}
@@ -372,10 +420,12 @@ export function AnalysisPane({
 
 export function ChatThread({
   messages,
-  onCitation
+  onCitation,
+  onRetry
 }: {
   messages: ChatThreadMessage[];
   onCitation: (citation: Citation) => void;
+  onRetry: () => void;
 }) {
   const threadRef = React.useRef<HTMLDivElement>(null);
 
@@ -397,7 +447,7 @@ export function ChatThread({
         <div className="cia-message-list">
           <AnimatePresence initial={false}>
             {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} onCitation={onCitation} />
+              <ChatMessage key={message.id} message={message} onCitation={onCitation} onRetry={onRetry} />
             ))}
           </AnimatePresence>
         </div>
@@ -408,10 +458,12 @@ export function ChatThread({
 
 export function ChatMessage({
   message,
-  onCitation
+  onCitation,
+  onRetry
 }: {
   message: ChatThreadMessage;
   onCitation: (citation: Citation) => void;
+  onRetry: () => void;
 }) {
   if (message.role === "user") {
     return (
@@ -424,7 +476,7 @@ export function ChatMessage({
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="cia-assistant-message">
       <p className="cia-assistant-label">{message.refused ? "REFUSAL" : "CONTRACT INTELLIGENCE"}</p>
-      <p>{message.text || (message.streaming ? "Reading the cited sections..." : "")}</p>
+      <div className="cia-answer-copy">{message.text ? renderAnswer(message.text) : message.streaming ? <p>Reading the cited sections...</p> : null}</div>
       {message.citations.length ? (
         <div className="cia-citation-group">
           <span className="cia-context-label">Source context</span>
@@ -444,6 +496,11 @@ export function ChatMessage({
               : "The document does not provide enough information to answer without guessing."}
           </p>
         </div>
+      ) : null}
+      {message.refusalReason === "stream_interrupted" ? (
+        <button type="button" className="cia-retry-button" onClick={onRetry}>
+          <RotateCcw size={14} aria-hidden="true" /> Try again
+        </button>
       ) : null}
     </motion.div>
   );
@@ -501,6 +558,15 @@ export function ChatInput({
       </Button>
     </form>
   );
+}
+
+function renderAnswer(text: string) {
+  return text.split(/\n+/).map((line, index) => {
+    const trimmed = line.trim();
+    if (!trimmed) return <br key={index} />;
+    if (/^[-*]\s/.test(trimmed)) return <li key={index}>{trimmed.slice(2)}</li>;
+    return <p key={index}>{trimmed}</p>;
+  });
 }
 
 export function EmptyState({
