@@ -15,6 +15,7 @@ import {
   MobileTabs,
   TopBar,
   type ChatThreadMessage,
+  type ComparisonSummary,
   type UploadState,
   type WorkspaceTab
 } from "./workspace-components";
@@ -31,6 +32,7 @@ export function ContractWorkspace() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ChatThreadMessage[]>([]);
   const [lastQuestion, setLastQuestion] = useState("");
+  const [comparison, setComparison] = useState<ComparisonSummary | null>(null);
   const [streaming, setStreaming] = useState(false);
   const [activePage, setActivePage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
@@ -77,6 +79,7 @@ export function ContractWorkspace() {
     setError(null);
     setMessages([]);
     setLastQuestion("");
+    setComparison(null);
     setAnalysis(null);
     setIngestion(null);
     setActiveCitation(null);
@@ -105,6 +108,19 @@ export function ContractWorkspace() {
       setActivePage(citation.source_locator.page_number);
     }
     setActiveTab("document");
+  }
+
+  async function handleCompare(selectedFile: File) {
+    try {
+      const uploaded = await uploadDocument(selectedFile);
+      const compared = await fetchClauseAnalysis(uploaded.document.document_id);
+      const current = new Map((analysis?.clauses ?? []).map((clause) => [clause.clause_id, clause]));
+      const incoming = new Map(compared.clauses.map((clause) => [clause.clause_id, clause]));
+      const changed = compared.clauses.filter((clause) => current.has(clause.clause_id) && current.get(clause.clause_id)?.clause_text !== clause.clause_text).length;
+      setComparison({ filename: selectedFile.name, added: Math.max(0, incoming.size - current.size), removed: Math.max(0, current.size - incoming.size), changed });
+    } catch {
+      setComparison({ filename: selectedFile.name, added: 0, removed: 0, changed: 0, error: "Comparison failed" });
+    }
   }
 
   function submitQuestion(event: React.FormEvent<HTMLFormElement>) {
@@ -213,6 +229,7 @@ export function ContractWorkspace() {
         pageCount={pageCount}
         hasDocument={Boolean(file)}
         onUpload={handleUpload}
+        onCompare={handleCompare}
       />
       <MobileTabs activeTab={activeTab} onChange={setActiveTab} />
       <div className="cia-workspace">
@@ -241,6 +258,7 @@ export function ContractWorkspace() {
             analysis={analysis}
             activeRiskByClause={activeRiskByClause}
             activeCitationId={activeCitation?.citation_id ?? null}
+            comparison={comparison}
             messages={messages}
             question={question}
             streaming={streaming}

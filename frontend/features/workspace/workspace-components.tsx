@@ -6,6 +6,7 @@ import {
   ArrowUp,
   ChevronUp,
   FileUp,
+  FileDiff,
   ListFilter,
   MoreHorizontal,
   RotateCcw,
@@ -44,6 +45,7 @@ export type ChatThreadMessage = {
   refusalReason?: string;
   streaming?: boolean;
 };
+export type ComparisonSummary = { filename: string; added: number; removed: number; changed: number; error?: string };
 
 type UploadHandler = (file: File) => void;
 
@@ -54,7 +56,8 @@ export function TopBar({
   page,
   pageCount,
   hasDocument,
-  onUpload
+  onUpload,
+  onCompare
 }: {
   title: string;
   meta: string | null;
@@ -63,6 +66,7 @@ export function TopBar({
   pageCount: number;
   hasDocument: boolean;
   onUpload: UploadHandler;
+  onCompare: UploadHandler;
 }) {
   return (
     <header className="cia-topbar">
@@ -85,6 +89,10 @@ export function TopBar({
           <label className="cia-icon-button" title="Upload another contract" aria-label="Upload another contract">
             <Upload size={19} aria-hidden="true" />
             <input className="sr-only" type="file" accept={acceptedFileTypes} onChange={(event) => pickFile(event, onUpload)} />
+          </label>
+          <label className="cia-icon-button" aria-label="Compare with another contract" title="Compare with another contract">
+            <FileDiff size={18} aria-hidden="true" />
+            <input className="sr-only" type="file" accept={acceptedFileTypes} onChange={(event) => pickFile(event, onCompare)} />
           </label>
           <button className="cia-icon-button cia-icon-button-ghost" type="button" aria-label="More document actions" title="More actions">
             <MoreHorizontal size={20} aria-hidden="true" />
@@ -347,6 +355,7 @@ export function AnalysisPane({
   analysis,
   activeRiskByClause,
   activeCitationId,
+  comparison,
   messages,
   onRetry,
   question,
@@ -361,6 +370,7 @@ export function AnalysisPane({
   analysis: ClauseAnalysisResult | null;
   activeRiskByClause: Map<string, RiskAssessment>;
   activeCitationId: string | null;
+  comparison: ComparisonSummary | null;
   messages: ChatThreadMessage[];
   onRetry: () => void;
   question: string;
@@ -400,6 +410,7 @@ export function AnalysisPane({
 
   return (
     <div className="cia-analysis-pane">
+      {comparison ? <ComparisonBanner comparison={comparison} /> : null}
       {warnings.length ? <div className="cia-warning-banner" role="status"><AlertCircle size={16} aria-hidden="true" /><span>{warnings[0]}</span></div> : null}
       <ClauseSummaryTable analysis={analysis} activeRiskByClause={activeRiskByClause} activeCitationId={activeCitationId} onCitation={onCitation} />
       <div className="cia-collapse-strip">
@@ -414,6 +425,15 @@ export function AnalysisPane({
         onChange={onQuestionChange}
         onSubmit={onQuestionSubmit}
       />
+    </div>
+  );
+}
+
+function ComparisonBanner({ comparison }: { comparison: ComparisonSummary }) {
+  return (
+    <div className="cia-comparison-banner" role="status">
+      <strong>Compared with {comparison.filename}</strong>
+      {comparison.error ? <span>{comparison.error}</span> : <span>{comparison.added} added · {comparison.removed} removed · {comparison.changed} changed</span>}
     </div>
   );
 }

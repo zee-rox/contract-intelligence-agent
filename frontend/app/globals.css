@@ -556,6 +556,21 @@ button {
   padding: 10px 20px;
 }
 
+.cia-comparison-banner {
+  display: grid;
+  gap: 3px;
+  border-bottom: 1px solid var(--cia-line);
+  background: #f3f7f8;
+  color: var(--cia-brand);
+  font-size: 11px;
+  line-height: 1.35;
+  padding: 10px 20px;
+}
+
+.cia-comparison-banner span {
+  color: var(--cia-text-soft);
+}
+
 .cia-clause-row {
   display: grid;
   min-height: 62px;
