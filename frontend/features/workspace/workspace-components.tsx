@@ -230,8 +230,8 @@ export function PageThumbnailRail({
 function StatusPill({ status }: { status: UploadState }) {
   const labels: Record<UploadState, string> = {
     idle: "No document",
-    uploading: "Parsing...",
-    analyzing: "Parsing...",
+    uploading: "Uploading...",
+    analyzing: "Processing...",
     ready: "Ready",
     error: "Needs review"
   };
@@ -342,9 +342,9 @@ export function AnalysisPane({
     return (
       <div className="cia-analysis-pane">
         <SkeletonLoader variant="analysis" />
-        <div className="cia-processing-chat">
-          <h2>Preparing your analysis</h2>
-          <p>You can ask questions once indexing is complete.</p>
+        <div className="cia-processing-chat" role="status" aria-live="polite">
+          <h2>{state === "uploading" ? "Uploading your contract" : "Processing your contract"}</h2>
+          <p>{state === "uploading" ? "The previous document has been cleared." : "Extracting clauses, risks, and source references..."}</p>
         </div>
         <ChatInput disabled value="" streaming={false} onChange={() => undefined} onSubmit={(event) => event.preventDefault()} />
       </div>
@@ -377,8 +377,17 @@ export function ChatThread({
   messages: ChatThreadMessage[];
   onCitation: (citation: Citation) => void;
 }) {
+  const threadRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const thread = threadRef.current;
+    if (thread && typeof thread.scrollTo === "function") {
+      thread.scrollTo({ top: thread.scrollHeight, behavior: "smooth" });
+    }
+  }, [messages]);
+
   return (
-    <section className="cia-chat-thread" aria-labelledby="chat-heading" aria-live="polite">
+    <section ref={threadRef} className="cia-chat-thread" aria-labelledby="chat-heading" aria-live="polite">
       <h2 id="chat-heading">Ask this contract</h2>
       {messages.length === 0 ? (
         <div className="cia-chat-placeholder">
@@ -417,9 +426,13 @@ export function ChatMessage({
       <p className="cia-assistant-label">{message.refused ? "REFUSAL" : "CONTRACT INTELLIGENCE"}</p>
       <p>{message.text || (message.streaming ? "Reading the cited sections..." : "")}</p>
       {message.citations.length ? (
-        <div className="cia-citation-row">
+        <div className="cia-citation-group">
+          <span className="cia-context-label">Source context</span>
           {message.citations.map((citation) => (
-            <CitationChip key={citation.citation_id} citation={citation} onClick={onCitation} />
+            <div className="cia-citation-item" key={citation.citation_id}>
+              <p className="cia-citation-context">{citation.quoted_snippet}</p>
+              <CitationChip citation={citation} onClick={onCitation} />
+            </div>
           ))}
         </div>
       ) : null}
@@ -652,9 +665,9 @@ function summarizeClause(clause: ExtractedClause, risk: RiskAssessment | undefin
 
 function sourceLabel(locator: SourceLocator) {
   if (locator.source_type === "pdf") {
-    return `p. ${locator.page_number}`;
+    return `Clause · p. ${locator.page_number}`;
   }
-  return `para. ${locator.paragraph_start}`;
+  return `Clause · para. ${locator.paragraph_start}`;
 }
 
 function capitalize(value: string) {

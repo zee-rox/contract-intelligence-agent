@@ -34,6 +34,7 @@ export function ContractWorkspace() {
   const [activePage, setActivePage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const docxRefs = useRef<Record<string, HTMLElement | null>>({});
+  const uploadSequence = useRef(0);
 
   const activeRiskByClause = useMemo(() => {
     const map = new Map<string, RiskAssessment>();
@@ -62,6 +63,7 @@ export function ContractWorkspace() {
   }, [activeCitation]);
 
   async function handleUpload(selectedFile: File) {
+    const sequence = ++uploadSequence.current;
     setFile(selectedFile);
     setFileUrl((current) => {
       if (current) {
@@ -81,9 +83,11 @@ export function ContractWorkspace() {
 
     try {
       const uploaded = await uploadDocument(selectedFile);
+      if (sequence !== uploadSequence.current) return;
       setIngestion(uploaded);
       setState("analyzing");
       const result = await fetchClauseAnalysis(uploaded.document.document_id);
+      if (sequence !== uploadSequence.current) return;
       setAnalysis(result);
       setState("ready");
       setActiveTab("analysis");
@@ -208,6 +212,7 @@ export function ContractWorkspace() {
       <div className="cia-workspace">
         <section className={activeTab === "document" ? "cia-pane cia-pane-visible" : "cia-pane"} aria-label="Document workspace">
           <DocumentViewer
+            key={`${fileUrl ?? "empty"}-${state}`}
             state={state}
             error={error}
             file={file}

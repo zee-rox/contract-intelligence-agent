@@ -222,6 +222,11 @@ button {
   background: var(--cia-document-empty-bg);
 }
 
+.cia-document-pane > .cia-document-skeleton {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .cia-thumbnail-rail {
   display: flex;
   flex-direction: column;
@@ -265,14 +270,21 @@ button {
 
 .cia-pdf-viewer {
   position: relative;
+  min-width: 0;
+  min-height: 0;
   overflow: auto;
   padding: clamp(24px, 3.5vw, 40px) clamp(16px, 5vw, 64px) 96px;
 }
 
 .cia-pdf-page-shell {
   position: relative;
-  width: fit-content;
+  width: max-content;
   margin: 0 auto;
+}
+
+.cia-pdf-page-shell-enter {
+  animation: cia-page-enter 220ms ease-out;
+  scroll-margin-top: 24px;
 }
 
 .cia-pdf-page {
@@ -297,6 +309,13 @@ button {
   pointer-events: none;
   border-radius: 5px;
   background: color-mix(in srgb, var(--cia-highlight), transparent 70%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--cia-highlight), #a86c00 22%);
+  transition: left 180ms ease, top 180ms ease, width 180ms ease, height 180ms ease;
+}
+
+@keyframes cia-page-enter {
+  from { opacity: 0.45; transform: translateY(8px) scale(0.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .cia-printed-page {
@@ -550,6 +569,7 @@ button {
 .cia-chat-thread {
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 24px;
 }
 
@@ -612,6 +632,33 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.cia-citation-group {
+  display: grid;
+  gap: 8px;
+}
+
+.cia-context-label {
+  color: var(--cia-text-soft);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cia-citation-item {
+  display: grid;
+  gap: 8px;
+  border-left: 2px solid var(--cia-highlight);
+  padding-left: 12px;
+}
+
+.cia-citation-context {
+  margin: 0;
+  color: var(--cia-text-soft);
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .cia-citation-chip {
@@ -703,11 +750,21 @@ button {
 
 .cia-empty-state {
   display: grid;
+  width: min(100%, 430px);
+  min-width: 0;
   max-width: 430px;
   place-items: center;
   justify-self: center;
   align-self: center;
   text-align: center;
+}
+
+.cia-empty-state p,
+.cia-empty-state h2,
+.cia-empty-state small {
+  width: 100%;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 
 .cia-document-empty .cia-empty-state {
