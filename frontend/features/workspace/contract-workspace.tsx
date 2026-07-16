@@ -114,10 +114,8 @@ export function ContractWorkspace() {
     try {
       const uploaded = await uploadDocument(selectedFile);
       const compared = await fetchClauseAnalysis(uploaded.document.document_id);
-      const current = new Map((analysis?.clauses ?? []).map((clause) => [clause.clause_id, clause]));
-      const incoming = new Map(compared.clauses.map((clause) => [clause.clause_id, clause]));
-      const changed = compared.clauses.filter((clause) => current.has(clause.clause_id) && current.get(clause.clause_id)?.clause_text !== clause.clause_text).length;
-      setComparison({ filename: selectedFile.name, added: Math.max(0, incoming.size - current.size), removed: Math.max(0, current.size - incoming.size), changed });
+      const diff = compareClauses(analysis?.clauses ?? [], compared.clauses);
+      setComparison({ filename: selectedFile.name, ...diff });
     } catch {
       setComparison({ filename: selectedFile.name, added: 0, removed: 0, changed: 0, error: "Comparison failed" });
     }
@@ -271,6 +269,78 @@ export function ContractWorkspace() {
       </div>
     </main>
   );
+}
+
+function compareClauses(
+  current: ClauseAnalysisResult["clauses"],
+  incoming: ClauseAnalysisResult["clauses"]
+) {
+  const matchedCurrent = new Set<number>();
+  let changed = 0;
+
+  incoming.forEach((candidate, incomingIndex) => {
+    const matchIndex = findClauseMatch(candidate, current, matchedCurrent, incomingIndex);
+    if (matchIndex === null) {
+      return;
+    }
+    matchedCurrent.add(matchIndex);
+    if (normalizeClauseText(current[matchIndex].clause_text) !== normalizeClauseText(candidate.clause_text)) {
+      changed += 1;
+    }
+  });
+
+  return {
+    added: incoming.length - matchedCurrent.size,
+    removed: current.length - matchedCurrent.size,
+    changed
+  };
+}
+
+function findClauseMatch(
+  candidate: ClauseAnalysisResult["clauses"][number],
+  current: ClauseAnalysisResult["clauses"],
+  used: Set<number>,
+  incomingIndex: number
+): number | null {
+  const exactHeading = current.findIndex((item, index) =>
+    !used.has(index) &&
+    item.clause_type === candidate.clause_type &&
+    normalizeClauseText(item.clause_heading ?? "") === normalizeClauseText(candidate.clause_heading ?? "")
+  );
+  if (exactHeading >= 0) {
+    return exactHeading;
+  }
+
+  const candidateTokens = clauseTokens(candidate.clause_text);
+  let best: { index: number; score: number; distance: number } | null = null;
+  for (const [index, item] of current.entries()) {
+    if (used.has(index)) {
+      continue;
+    }
+    if (item.clause_type !== candidate.clause_type) {
+      continue;
+    }
+    const score = jaccard(candidateTokens, clauseTokens(item.clause_text));
+    const distance = Math.abs(index - incomingIndex);
+    if (score >= 0.35 && (!best || score > best.score || (score === best.score && distance < best.distance))) {
+      best = { index, score, distance };
+    }
+  }
+  return best?.index ?? null;
+}
+
+function normalizeClauseText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function clauseTokens(value: string) {
+  return new Set(normalizeClauseText(value).split(" ").filter((token) => token.length > 2));
+}
+
+function jaccard(left: Set<string>, right: Set<string>) {
+  const intersection = [...left].filter((token) => right.has(token)).length;
+  const union = new Set([...left, ...right]).size;
+  return union ? intersection / union : 0;
 }
 
 function dedupeCitations(citations: Citation[]) {

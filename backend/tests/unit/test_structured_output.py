@@ -38,4 +38,5 @@ def test_parse_clause_json_discards_unknown_model_chunk_ids() -> None:
 
     assert clauses
     assert clauses[0].source_chunk_ids == [chunk.chunk_id]
-    assert clauses[0].source_locators == chunk.source_locators
+    assert clauses[0].source_locators[0].char_offset_start == 0
+    assert clauses[0].source_locators[0].char_offset_end == len(chunk.normalized_text)

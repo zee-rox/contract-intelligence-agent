@@ -73,7 +73,7 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
         response_provider = response.provider
         response_model = response.model
         try:
-            clauses = parse_clause_json(response.content, document_id, chunks)
+            clauses = parse_clause_json(response.content, document_id, chunks, warnings)
             logger.info("clause extraction parsed clauses=%s", len(clauses))
         except json.JSONDecodeError:
             correction = provider.generate(
@@ -85,7 +85,7 @@ def extract_clauses_single_pass(document_id: UUID, chunks: list[CandidateChunk],
             )
             response_provider = correction.provider
             response_model = correction.model
-            clauses = parse_clause_json(correction.content, document_id, chunks)
+            clauses = parse_clause_json(correction.content, document_id, chunks, warnings)
             logger.info("clause extraction correction parsed clauses=%s", len(clauses))
         if not clauses:
             raise ValueError("provider returned no valid clauses")

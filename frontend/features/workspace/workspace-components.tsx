@@ -612,7 +612,7 @@ export function EmptyState({
       {isUpload && onUpload ? (
         <>
           <label className="cia-primary-upload">
-            Choose PDF
+            Choose file
             <input className="sr-only" type="file" accept={acceptedFileTypes} onChange={(event) => pickFile(event, onUpload)} />
           </label>
           <small>PDF or DOCX up to 25 MB • Your document stays private</small>

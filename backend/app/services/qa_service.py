@@ -8,7 +8,6 @@ from app.agents.qa import (
     build_grounded_answer,
     create_citations,
     has_prompt_injection_marker,
-    lexical_overlap,
     parse_model_qa_response,
     validate_or_repair_response,
 )
@@ -16,8 +15,10 @@ from app.config import Settings, get_settings
 from app.llm.factory import build_llm_provider
 from app.llm.interface import LLMMessage
 from app.retrieval.embeddings import HashEmbeddingService
+from app.retrieval.bm25 import rank_chunks
 from app.retrieval.index import DocumentFaissIndex
 from app.schemas.qa import Citation, ModelQAResponse, QAResponse
+from app.schemas.retrieval import RetrievalResult
 from app.storage.repository import StorageRepository
 
 logger = logging.getLogger(__name__)
@@ -34,27 +35,18 @@ class QAService:
 
     def answer_question(self, document_id: UUID, question: str) -> QAResponse:
         chunks = self.repository.load_chunks(document_id)
-        results = [
+        semantic_results = [
             result
             for result in self.index.search(document_id, question, self.settings.retrieval_top_k)
             if result.score >= self.settings.retrieval_score_threshold
         ]
+        lexical_results = rank_chunks(question, chunks, self.settings.retrieval_top_k)
+        results = _merge_retrieval_results(semantic_results, lexical_results)
         if not results:
             return self._refuse("insufficient_evidence")
         by_id = {chunk.chunk_id: chunk for chunk in chunks}
-        results.sort(
-            key=lambda result: (
-                lexical_overlap(question, by_id[result.chunk_id].normalized_text),
-                result.score,
-            ),
-            reverse=True,
-        )
-        supported_results = [
-            result
-            for result in results
-            if lexical_overlap(question, by_id[result.chunk_id].normalized_text) > 0
-            and not has_prompt_injection_marker(by_id[result.chunk_id].normalized_text)
-        ]
+        results.sort(key=lambda result: result.score, reverse=True)
+        supported_results = [result for result in results if not has_prompt_injection_marker(by_id[result.chunk_id].normalized_text)]
         if not supported_results:
             return self._refuse("insufficient_evidence")
 
@@ -127,6 +119,25 @@ class QAService:
 
 def _sse(event: str, data: dict[str, Any]) -> str:
     return f"event: {event}\ndata: {json.dumps(data, sort_keys=True)}\n\n"
+
+
+def _merge_retrieval_results(
+    semantic_results: list[RetrievalResult],
+    lexical_results: list[tuple[str, float]],
+) -> list[RetrievalResult]:
+    scores: dict[str, float] = {}
+    for result in semantic_results:
+        scores[result.chunk_id] = max(scores.get(result.chunk_id, 0.0), max(0.0, result.score) * 0.7)
+    lexical_max = max((score for _, score in lexical_results), default=0.0)
+    for chunk_id, score in lexical_results:
+        normalized = score / lexical_max if lexical_max else 0.0
+        scores[chunk_id] = max(scores.get(chunk_id, 0.0), normalized * 0.3)
+    ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+    return [
+        RetrievalResult(chunk_id=chunk_id, score=score, rank=rank)
+        for rank, (chunk_id, score) in enumerate(ranked, start=1)
+        if score > 0
+    ]
 
 
 def get_qa_service() -> QAService:

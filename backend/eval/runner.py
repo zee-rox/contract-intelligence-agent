@@ -130,6 +130,12 @@ def compute_metrics(details: list[dict[str, Any]]) -> tuple[dict[str, Any], dict
     citation_failures: list[dict[str, str]] = []
     unsupported_answer_issues: list[dict[str, str]] = []
     incorrect_refusals: list[dict[str, str]] = []
+    answer_term_total = 0
+    answer_term_supported = 0
+    citation_term_total = 0
+    citation_term_supported = 0
+    answer_term_failures: list[dict[str, str]] = []
+    citation_term_failures: list[dict[str, str]] = []
     ocr_expected = 0
     ocr_actual = 0
 
@@ -182,6 +188,24 @@ def compute_metrics(details: list[dict[str, Any]]) -> tuple[dict[str, Any], dict
 
         for qa in detail["qa_results"]:
             response = qa["response"]
+            answer_text = response.get("answer", "").casefold()
+            citation_text = " ".join(item["quoted_snippet"] for item in response.get("citations", [])).casefold()
+            for term in qa.get("expected_answer_terms", []):
+                answer_term_total += 1
+                if term.casefold() in answer_text:
+                    answer_term_supported += 1
+                else:
+                    answer_term_failures.append(
+                        {"document_id": detail["dataset_document_id"], "question": qa["question"], "term": term}
+                    )
+            for term in qa.get("expected_citation_terms", []):
+                citation_term_total += 1
+                if term.casefold() in citation_text:
+                    citation_term_supported += 1
+                else:
+                    citation_term_failures.append(
+                        {"document_id": detail["dataset_document_id"], "question": qa["question"], "term": term}
+                    )
             refusal_total += 1
             if bool(response["refused"]) == bool(qa["expected_refused"]):
                 refusal_correct += 1
@@ -189,7 +213,7 @@ def compute_metrics(details: list[dict[str, Any]]) -> tuple[dict[str, Any], dict
                 incorrect_refusals.append({"document_id": detail["dataset_document_id"], "question": qa["question"]})
             if qa["expected_refused"] and not response["refused"]:
                 unsupported_answer_issues.append({"document_id": detail["dataset_document_id"], "question": qa["question"]})
-            for citation in response["citations"]:
+            for citation in response.get("citations", []):
                 citations_total += 1
                 cited_chunk = chunks.get(citation["chunk_id"])
                 valid = bool(
@@ -214,6 +238,12 @@ def compute_metrics(details: list[dict[str, Any]]) -> tuple[dict[str, Any], dict
             },
             "risk": {"accuracy": ratio(risk_correct, risk_total), "evaluated": risk_total},
             "citation": {"validity_rate": ratio(citations_valid, citations_total), "evaluated": citations_total},
+            "qa_grounding": {
+                "answer_term_recall": ratio(answer_term_supported, answer_term_total),
+                "citation_term_recall": ratio(citation_term_supported, citation_term_total),
+                "answer_terms_evaluated": answer_term_total,
+                "citation_terms_evaluated": citation_term_total,
+            },
             "refusal": {"accuracy": ratio(refusal_correct, refusal_total), "evaluated": refusal_total},
             "ocr": {
                 "evaluated_pages": ocr_expected,
@@ -228,6 +258,8 @@ def compute_metrics(details: list[dict[str, Any]]) -> tuple[dict[str, Any], dict
             "unsupported_answer_issues": unsupported_answer_issues,
             "citation_failures": citation_failures,
             "incorrect_refusals": incorrect_refusals,
+            "answer_term_failures": answer_term_failures,
+            "citation_term_failures": citation_term_failures,
             "ocr_degradation": "not evaluated; dataset contains no OCR fixture" if ocr_expected == 0 else "see OCR metric",
         },
     )

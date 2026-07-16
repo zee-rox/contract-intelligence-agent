@@ -109,7 +109,7 @@ describe("ContractWorkspace", () => {
     });
 
     render(<ContractWorkspace />);
-    const fileInput = screen.getByLabelText(/choose pdf/i);
+    const fileInput = screen.getByLabelText(/choose file/i);
     await userEvent.upload(
       fileInput,
       new File(["contract"], "sample.docx", {
@@ -136,7 +136,7 @@ describe("ContractWorkspace", () => {
 
     render(<ContractWorkspace />);
     await userEvent.upload(
-      screen.getByLabelText(/choose pdf/i),
+      screen.getByLabelText(/choose file/i),
       new File(["contract"], "sample.docx", {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       })
@@ -202,7 +202,7 @@ describe("ContractWorkspace", () => {
     );
 
     render(<ContractWorkspace />);
-    await userEvent.upload(screen.getByLabelText(/choose pdf/i), new File(["%PDF"], "bad.pdf", { type: "application/pdf" }));
+    await userEvent.upload(screen.getByLabelText(/choose file/i), new File(["%PDF"], "bad.pdf", { type: "application/pdf" }));
 
     expect((await screen.findAllByText(/unsupported file type/i)).length).toBeGreaterThan(0);
   });

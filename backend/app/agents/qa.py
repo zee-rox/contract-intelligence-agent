@@ -4,6 +4,7 @@ import json
 from app.schemas.chunks import CandidateChunk
 from app.schemas.qa import Citation, ModelQAResponse, QAResponse
 from app.schemas.retrieval import RetrievalResult
+from app.schemas.sources import SourceLocator
 
 STOPWORDS = {
     "a",
@@ -58,15 +59,25 @@ def create_citations(question: str, chunks: list[CandidateChunk], results: list[
         snippet = choose_snippet(question, chunk.normalized_text)
         if not snippet or not _snippet_is_grounded(snippet, chunk.normalized_text):
             continue
+        locator = _locator_for_snippet(chunk, snippet)
         citations.append(
             Citation(
                 citation_id=f"cit_{len(citations):04d}",
                 chunk_id=chunk.chunk_id,
-                source_locator=chunk.source_locators[0],
+                source_locator=locator,
                 quoted_snippet=snippet,
             )
         )
     return citations
+
+
+def _locator_for_snippet(chunk: CandidateChunk, snippet: str) -> SourceLocator:
+    start = chunk.normalized_text.casefold().find(snippet.casefold())
+    if start < 0 or not chunk.source_locators:
+        return chunk.source_locators[0]
+    end = start + len(snippet)
+    locator = chunk.source_locators[0]
+    return locator.model_copy(update={"char_offset_start": start, "char_offset_end": end})
 
 
 def _snippet_is_grounded(snippet: str, source: str) -> bool:
